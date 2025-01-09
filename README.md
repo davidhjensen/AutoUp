@@ -1,0 +1,2 @@
+# AutoUp: An Automated Techpack Generator
+The end goal is to have an HTML form that can be filled out with required info for a complete techpack. The techpack PDF will then be returned using an Azure function.
