@@ -1,2 +1,2 @@
 # AutoUp: An Automated Techpack Generator
-The end goal is to have an HTML form that can be filled out with required info for a complete techpack. The techpack PDF will then be returned using an Azure function.
+The end goal is to have an HTML form that can be filled out with required info for a complete techpack. The techpack PDF will then be returned using an Azure function. [This](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-node?pivot=nodejs-model-v3&pivots=nodejs-model-v4) tuturial was used to set up the development environment in VS Code.
