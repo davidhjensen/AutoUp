@@ -162,8 +162,8 @@ async function techpackGenerator(fields, files, console) {
         let path = "../assets/renders/";
         
         path = path + ((helmet_class=="Vented Class C") ? "C/" : "E/");
-        path = path + helmet_view + "/";
         if(["Front", "Back"].includes(helmet_view)) {
+            path = path + helmet_view + "/";
             if(helmet_class=="Vented Class C") {
                 path = path + helmet_model + " ";
                 path = path + ((helmet_view=="Back") ? "Rear View_" : "Front View_");
@@ -175,11 +175,11 @@ async function techpackGenerator(fields, files, console) {
                 path = path + ((helmet_class=="Vented Class C") ? "C.png" : "E.png");
             }
         } else {
+            path = path + ((helmet_view=="Left") ? "Left Side/" : "Right Side/");
             path = path + "STUDSON_TechPack_";
             path = path + ((helmet_model=="Standard Brim") ? "SB_" : "FB_");
             path = path + ((helmet_class=="Vented Class C") ? "C_" : "E_");
-            path = path + helmet_color + "-";
-            path = path + ((helmet_view=="Left") ? "LS" : "RS") + ".png";
+            path = path + helmet_color + ".png";
         }
         console.log(path);
         return path;
@@ -239,7 +239,40 @@ async function techpackGenerator(fields, files, console) {
                 break;
 
             case "Left":
+                // logo location and scale
+                if(model=="Standard Brim") {
+                    center_y = 660;
+                    center_x = 1780;
+                    scaler = 300; // pixels per inch
+                } else {
+                    center_y = 780;
+                    center_x = 1730;
+                    scaler = 285; // pixels per inch
+                }
+
+                // Convert SVG to PNG
+                await sharp(Buffer.from(logo_buffer))
+                    .resize(Math.round(width*scaler), Math.round(5*width*scaler), {fit: "inside"}) // fit WIDTH only to provided width (5x limit on height)
+                    .png() // Convert to PNG format
+                    .toFile(logo_path); // Save to specified file path
+                logo = await loadImage(logo_path);
+
+                // Simulate curved warping and vertical compression
+                logoWidth = logo.width;
+                logoHeight = logo.height;
+                curveHeight = 20; // concave down
+                compression = .65;
                 
+                for (let x = 0; x < logoWidth; x++) {
+                    yOffset = Math.sin((x / (logoWidth)) * Math.PI) * curveHeight;                // curve logo
+                    slice_x = Math.round(center_x - logo.width/2 + x);                          // center shifted back half the distnace of the logo written left to right
+                    slice_y = Math.round(center_y - yOffset - logo.height/2 - shift*scaler);    // center shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    ctx.drawImage(
+                        logo,
+                        x, 0, 1, logoHeight,       // Source: slice 1px wide
+                        slice_x, slice_y, 1, logoHeight*compression // Destination: warp along the curve
+                    );
+                }
                 break;
 
             case "Right":
