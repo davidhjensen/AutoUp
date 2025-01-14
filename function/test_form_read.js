@@ -164,9 +164,16 @@ async function techpackGenerator(fields, files, console) {
         path = path + ((helmet_class=="Vented Class C") ? "C/" : "E/");
         path = path + helmet_view + "/";
         if(["Front", "Back"].includes(helmet_view)) {
-            path = path + helmet_model + " ";
-            path = path + ((helmet_view=="Back") ? "Rear View_" : "Front View_");
-            path = path + helmet_color + ".png";
+            if(helmet_class=="Vented Class C") {
+                path = path + helmet_model + " ";
+                path = path + ((helmet_view=="Back") ? "Rear View_" : "Front View_");
+                path = path + helmet_color + ".png";
+            } else {
+                path = path + helmet_model + "_TechPack ";
+                path = path + ((helmet_view=="Back") ? "Rear View_" : "Front View_");
+                path = path + helmet_color + "_";
+                path = path + ((helmet_class=="Vented Class C") ? "C.png" : "E.png");
+            }
         } else {
             path = path + "STUDSON_TechPack_";
             path = path + ((helmet_model=="Standard Brim") ? "SB_" : "FB_");
@@ -174,6 +181,7 @@ async function techpackGenerator(fields, files, console) {
             path = path + helmet_color + "-";
             path = path + ((helmet_view=="Left") ? "LS" : "RS") + ".png";
         }
+        console.log(path);
         return path;
     }
 
@@ -189,6 +197,11 @@ async function techpackGenerator(fields, files, console) {
         let center_offset;
         let scaler;
 
+        let logo;
+        let logoWidth;
+        let logoHeight;
+        let curveHeight; 
+
         switch(view) {
             case "Front":
                 // logo location and scale
@@ -203,20 +216,20 @@ async function techpackGenerator(fields, files, console) {
 
                 // Convert SVG to PNG
                 await sharp(Buffer.from(logo_buffer))
-                    .resize(width*scaler, 5*width*scaler, {fit: "inside"}) // fit WIDTH only to provided width (5x limit on height)
+                    .resize(Math.round(width*scaler), Math.round(5*width*scaler), {fit: "inside"}) // fit WIDTH only to provided width (5x limit on height)
                     .png() // Convert to PNG format
                     .toFile(logo_path); // Save to specified file path
-                const logo = await loadImage(logo_path);
+                logo = await loadImage(logo_path);
 
                 // Simulate curved warping
-                const logoWidth = logo.width;
-                const logoHeight = logo.height;
-                const curveHeight = -logo.height*.005; // concave down
+                logoWidth = logo.width;
+                logoHeight = logo.height;
+                curveHeight = -logo.height*.005; // concave down
             
                 for (let x = 0; x < logoWidth; x++) {
-                    const yOffset = Math.sin((x / logoWidth) * Math.PI) * curveHeight;  // curve logo
-                    const slice_x = center_offset - logo.width/2 + x;                   // center shifted back half the distnace of the logo written left to right
-                    const slice_y = base_height - yOffset - logo.height;                // base height shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    yOffset = Math.sin((x / logoWidth) * Math.PI) * curveHeight;  // curve logo
+                    slice_x = Math.round(center_offset - logo.width/2 + x);                   // center shifted back half the distnace of the logo written left to right
+                    slice_y = Math.round(base_height - yOffset - logo.height - shift*scaler); // base height shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
                     ctx.drawImage(
                         logo,
                         x, 0, 1, logoHeight,       // Source: slice 1px wide
@@ -234,7 +247,39 @@ async function techpackGenerator(fields, files, console) {
                 break;
 
             case "Back":
-                
+                // logo location and scale
+                if(model=="Standard Brim") {
+                    center_y = 2250;
+                    center_x = 3920;
+                    scaler = 540; // pixels per inch
+                } else {
+                    center_y = 2290;
+                    center_x = 3890;
+                    scaler = 560; // pixels per inch
+                }
+                //console.log(`height: ${base_height} | offset`);
+                // Convert SVG to PNG
+                await sharp(Buffer.from(logo_buffer))
+                    .resize(Math.round(width*scaler), Math.round(5*width*scaler), {fit: "inside"}) // fit WIDTH only to provided width (5x limit on height)
+                    .png() // Convert to PNG format
+                    .toFile(logo_path); // Save to specified file path
+                logo = await loadImage(logo_path);
+
+                // Simulate curved warping
+                logoWidth = logo.width;
+                logoHeight = logo.height;
+                curveHeight = -logo.height*0; // no curve
+            
+                for (let x = 0; x < logoWidth; x++) {
+                    yOffset = Math.sin((x / logoWidth) * Math.PI) * curveHeight;  // curve logo
+                    slice_x = Math.round(center_x - logo.width/2 + x);                   // center shifted back half the distnace of the logo written left to right
+                    slice_y = Math.round(center_y - yOffset - logo.height/2 - shift*scaler); // center shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    ctx.drawImage(
+                        logo,
+                        x, 0, 1, logoHeight,       // Source: slice 1px wide
+                        slice_x, slice_y, 1, logoHeight // Destination: warp along the curve
+                    );
+                }
                 break;
 
             default:
