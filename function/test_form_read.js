@@ -85,7 +85,7 @@ async function techpackGenerator(fields, files, console) {
     for (let i = 0; i < parseInt(fields["numMockups"][0]); i++) {
 
         // generate page size based on number of views
-        let key_view = "views"+(i+1).toString()+"[]";
+        let key_view = `views${i+1}[]`;
         let num_views = fields[key_view].length;
         techpack.addPage({
             size: [400 + 1300*num_views, 2200]
@@ -110,35 +110,43 @@ async function techpackGenerator(fields, files, console) {
         });
 
         // TOP INFO/OPTIONS
-        let key_model = "helmetModel"+(i+1).toString();
-        let key_class = "helmetClass"+(i+1).toString();
-        let key_color = "helmetColor"+(i+1).toString();
+        let key_model = `helmetModel${i+1}`;
+        let key_class = `helmetClass${i+1}`;
+        let key_color = `helmetColor${i+1}`;
         techpack
             .font("../assets/fonts/Cantarell-Regular.ttf")
             .fontSize(30)
             .text("DATE:\nCUSTOMER:\nHELMET STYLE:\nCOLOR:\nCERTIFICATIONS:", 800, 50)
             .text(`${getDate()}\n${fields["companyName"]}\nSHK-1 ${fields[key_model]} ${fields[key_class]}\n${fields[key_color]}\nANSI Z89.1 - 2014 TYPE II`, 1100, 50);
 
-        // Warp logo and composite on helmet
-        
-        let helmet_path = generatePath(fields[key_model], fields[key_class], fields[key_color], fields[key_view]);
-        let key_logo_file = "logo" + (i+1).toString() + "_" + fields[key_view];
-        let logo_path = `../assets/temp/${fields[key_view]}_logo.png`;
-        let mockup_path = `../assets/temp/${fields[key_view]}_mockup.png`;
-        // Convert SVG to PNG
-        await sharp(Buffer.from(files[key_logo_file].buffer))
-            .resize(180, 180, {fit: "inside"})  // 2000=front full width
-                                                // 180=back full width
-            .png() // Convert to PNG format
-            .toFile(logo_path); // Save to specified file path
+        // Generate each view's mockup
+        for (const view of fields[key_view]) {
+            // Warp logo and composite on helmet
+            let helmet_path = generatePath(fields[key_model], fields[key_class], fields[key_color], view);
+            let key_logo_file = `logo${i+1}_${view}`;
+            let logo_path = `../assets/temp/${view}_logo.png`;
+            let mockup_path = `../assets/temp/${view}_mockup.png`;
+            let key_width = `logoWidth${i+1}_${view}`;
+            let key_shift = `logoShift${i+1}_${view}`;
+            await generateMockup(fields[key_model], view, helmet_path, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), console);
 
-        //await this.backWarpFB(helmet_path, logo_path, mockup_path);
-        
-        
+        }
+
+        // Clear temp files
+        /*
+        fs.readdir("../assets/temp", (err, files) => {
+            for (const file of files) {
+                fs.unlink(`../assets/temp/${file}`, (err) => {
+                  if (err) throw err;
+                });
+            }
+        });
+        */
     }
 
     techpack.end();
 
+    // return date string in format mm/dd/yyyy
     function getDate() {
         var today = new Date();
         var dd = String(today.getDate()).padStart(2, '0');
@@ -147,27 +155,143 @@ async function techpackGenerator(fields, files, console) {
         return mm + '/' + dd + '/' + yyyy;
     }
 
+    // generate the path to a given render provided helmet model, class, color, and view
     function generatePath(helmet_model, helmet_class, helmet_color, helmet_view) {
         // front/back: ../assets/renders/C/Back/Full Brim Rear View_Carbon
         // left/right: ../assets/renders/C/Right/STUDSON_TechPack_FB_C_Carbon-RS.png
         let path = "../assets/renders/";
         
-        path = path + ((helmet_class="Vented Class C") ? "C/" : "E/");
+        path = path + ((helmet_class=="Vented Class C") ? "C/" : "E/");
         path = path + helmet_view + "/";
-        if(helmet_view in ["Front", "Back"]) {
+        if(["Front", "Back"].includes(helmet_view)) {
             path = path + helmet_model + " ";
-            path = path + ((helmet_view="Back") ? "Rear View_" : "Front View_");
+            path = path + ((helmet_view=="Back") ? "Rear View_" : "Front View_");
             path = path + helmet_color + ".png";
         } else {
             path = path + "STUDSON_TechPack_";
-            path = path + ((helmet_model="Standard Brim") ? "SB_" : "FB_");
-            path = path + ((helmet_class="Vented Class C") ? "C_" : "E_");
+            path = path + ((helmet_model=="Standard Brim") ? "SB_" : "FB_");
+            path = path + ((helmet_class=="Vented Class C") ? "C_" : "E_");
             path = path + helmet_color + "-";
-            path = path + ((helmet_view="Left") ? "LS" : "RS") + ".png";
+            path = path + ((helmet_view=="Left") ? "LS" : "RS") + ".png";
         }
         return path;
     }
+
+    // place a logo on
+    async function generateMockup(model, view, helmet_path, logo_path, mockup_path, logo_buffer, width, shift, console) {
+
+        const helmet = await loadImage(helmet_path);
+        const canvas = createCanvas(helmet.width, helmet.height);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(helmet, 0, 0);
+
+        let base_height;
+        let center_offset;
+        let scaler;
+
+        switch(view) {
+            case "Front":
+                // logo location and scale
+                if(model=="Standard Brim") {
+                    base_height = 2870;
+                    center_offset = 3900;
+                } else {
+                    base_height = 2900;
+                    center_offset = 3900;
+                }
+                scaler = 492; // pixels per inch
+
+                // Convert SVG to PNG
+                await sharp(Buffer.from(logo_buffer))
+                    .resize(width*scaler, 5*width*scaler, {fit: "inside"}) // fit WIDTH only to provided width (5x limit on height)
+                    .png() // Convert to PNG format
+                    .toFile(logo_path); // Save to specified file path
+                const logo = await loadImage(logo_path);
+
+                // Simulate curved warping
+                const logoWidth = logo.width;
+                const logoHeight = logo.height;
+                const curveHeight = -logo.height*.005; // concave down
+            
+                for (let x = 0; x < logoWidth; x++) {
+                    const yOffset = Math.sin((x / logoWidth) * Math.PI) * curveHeight;  // curve logo
+                    const slice_x = center_offset - logo.width/2 + x;                   // center shifted back half the distnace of the logo written left to right
+                    const slice_y = base_height - yOffset - logo.height;                // base height shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    ctx.drawImage(
+                        logo,
+                        x, 0, 1, logoHeight,       // Source: slice 1px wide
+                        slice_x, slice_y, 1, logoHeight // Destination: warp along the curve
+                    );
+                }
+                break;
+
+            case "Left":
+                
+                break;
+
+            case "Right":
+                
+                break;
+
+            case "Back":
+                
+                break;
+
+            default:
+                console.log("Unknow view provided: note in {Front, Left, Right, Back}");                
+        }
+        // Save the result
+        const buffer = canvas.toBuffer('image/png');
+        fs.writeFileSync(mockup_path, buffer);
+    }
 }
+/*
+
+
+
+
+
+const helmet = await loadImage(helmet_path);
+        const logo = await loadImage(logo_path);
+      
+        // Create a canvas
+        const canvas = createCanvas(helmet.width, helmet.height);
+        const ctx = canvas.getContext('2d');
+      
+        // Draw the helmet
+        ctx.drawImage(helmet, 0, 0);
+      
+        // Simulate curved warping
+        const logoWidth = logo.width;
+        const logoHeight = logo.height;
+        const curveHeight = -logo.height*.04; // concave down
+      
+        // logo location
+        const base_height = 550;
+        const center_offset = 360;
+      
+        for (let x = 0; x < logoWidth; x++) {
+            const yOffset = Math.sin((x / logoWidth) * Math.PI) * curveHeight + (x)/logoWidth*20; // Adjust the curve
+            ctx.drawImage(
+                logo,
+                x, 0, 1, logoHeight,       // Source: slice 1px wide
+                center_offset + (helmet.width-logo.width)/2 + x, base_height - yOffset, 1, logoHeight // Destination: warp along the curve
+            );
+        }
+      
+        // Save the result
+        const buffer = canvas.toBuffer('image/png');
+        fs.writeFileSync(output_path, buffer);
+
+
+
+
+
+
+
+
+
+
 
 
 function SingleMockup(company, model, color, certifications, view, PMS1, PMS2, PMS3, PMS4) {
@@ -482,3 +606,4 @@ function SingleMockup(company, model, color, certifications, view, PMS1, PMS2, P
         fs.writeFileSync(output_path, buffer);
     }
 }
+*/
