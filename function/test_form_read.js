@@ -161,8 +161,8 @@ async function techpackGenerator(fields, files, console) {
         // left/right: ../assets/renders/C/Right/STUDSON_TechPack_FB_C_Carbon-RS.png
         let path = "../assets/renders/";
         
-        path = path + ((helmet_class=="Vented Class C") ? "C/" : "E/");
-        if(["Front", "Back"].includes(helmet_view)) {
+        if(helmet_view=="Front") {
+            path = path + ((helmet_class=="Vented Class C") ? "C/" : "E/");
             path = path + helmet_view + "/";
             if(helmet_class=="Vented Class C") {
                 path = path + helmet_model + " ";
@@ -174,6 +174,12 @@ async function techpackGenerator(fields, files, console) {
                 path = path + helmet_color + "_";
                 path = path + ((helmet_class=="Vented Class C") ? "C.png" : "E.png");
             }
+        } else if(helmet_view=="Back") {
+            path = path + "C/";
+            path = path + helmet_view + "/";
+            path = path + helmet_model + " ";
+            path = path + ((helmet_view=="Back") ? "Rear View_" : "Front View_");
+            path = path + helmet_color + ".png";
         } else {
             path = path + ((helmet_view=="Left") ? "Left Side/" : "Right Side/");
             path = path + "STUDSON_TechPack_";
