@@ -14,7 +14,7 @@
 </head>
 <body>
     <h1>Product Mockup Form</h1>
-    <form action="http://localhost:7071/api/techpackRequest" method="POST" enctype="multipart/form-data">
+    <form action="http://localhost:3000" method="POST" enctype="multipart/form-data">
 
         <label for="companyName">Company Name (required):</label><br>
         <input type="text" id="companyName" name="companyName" required><br><br>
@@ -47,8 +47,14 @@
                     <h3>Mockup ${i}</h3>
                     <label for="helmetModel${i}">Helmet Model:</label><br>
                     <select id="helmetModel${i}" name="helmetModel${i}" required>
-                        <option value="Half Brim">Half Brim</option>
+                        <option value="Standard Brim">Standard Brim</option>
                         <option value="Full Brim">Full Brim</option>
+                    </select><br><br>
+
+                    <label for="helmetClass${i}">Helmet Class:</label><br>
+                    <select id="helmetClass${i}" name="helmetClass${i}" required>
+                        <option value="Vented Class C">Vented Class C</option>
+                        <option value="Non-Vented Class E">Non-Vented Class E</option>
                     </select><br><br>
 
                     <label for="helmetColor${i}">Helmet Color:</label><br>
