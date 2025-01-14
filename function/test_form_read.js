@@ -180,12 +180,20 @@ async function techpackGenerator(fields, files, console) {
             path = path + helmet_model + " ";
             path = path + ((helmet_view=="Back") ? "Rear View_" : "Front View_");
             path = path + helmet_color + ".png";
-        } else {
+        } else if(helmet_view=="Left") {
+            path = path + ((helmet_class=="Vented Class C") ? "C/" : "E/");
             path = path + ((helmet_view=="Left") ? "Left Side/" : "Right Side/");
             path = path + "STUDSON_TechPack_";
             path = path + ((helmet_model=="Standard Brim") ? "SB_" : "FB_");
             path = path + ((helmet_class=="Vented Class C") ? "C_" : "E_");
             path = path + helmet_color + ".png";
+        } else {
+            path = path + ((helmet_class=="Vented Class C") ? "C/" : "E/");
+            path = path + ((helmet_view=="Left") ? "Left Side/" : "Right Side/");
+            path = path + "STUDSON_TechPack_";
+            path = path + ((helmet_model=="Standard Brim") ? "SB_" : "FB_");
+            path = path + ((helmet_class=="Vented Class C") ? "C_" : "E_");
+            path = path + helmet_color + "-RS.png";
         }
         console.log(path);
         return path;
@@ -282,7 +290,40 @@ async function techpackGenerator(fields, files, console) {
                 break;
 
             case "Right":
+                // logo location and scale
+                if(model=="Standard Brim") {
+                    center_y = 660;
+                    center_x = 1580;
+                    scaler = 300; // pixels per inch
+                } else {
+                    center_y = 790;
+                    center_x = 1560;
+                    scaler = 285; // pixels per inch
+                }
+
+                // Convert SVG to PNG
+                await sharp(Buffer.from(logo_buffer))
+                    .resize(Math.round(width*scaler), Math.round(5*width*scaler), {fit: "inside"}) // fit WIDTH only to provided width (5x limit on height)
+                    .png() // Convert to PNG format
+                    .toFile(logo_path); // Save to specified file path
+                logo = await loadImage(logo_path);
+
+                // Simulate curved warping and vertical compression
+                logoWidth = logo.width;
+                logoHeight = logo.height;
+                curveHeight = 20; // concave down
+                compression = .65;
                 
+                for (let x = 0; x < logoWidth; x++) {
+                    yOffset = Math.sin((x / (logoWidth)) * Math.PI) * curveHeight;                // curve logo
+                    slice_x = Math.round(center_x - logo.width/2 + x);                          // center shifted back half the distnace of the logo written left to right
+                    slice_y = Math.round(center_y - yOffset - logo.height/2 - shift*scaler);    // center shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    ctx.drawImage(
+                        logo,
+                        x, 0, 1, logoHeight,       // Source: slice 1px wide
+                        slice_x, slice_y, 1, logoHeight*compression // Destination: warp along the curve
+                    );
+                }
                 break;
 
             case "Back":
@@ -329,106 +370,9 @@ async function techpackGenerator(fields, files, console) {
         fs.writeFileSync(mockup_path, buffer);
     }
 }
+
+
 /*
-
-
-
-
-
-const helmet = await loadImage(helmet_path);
-        const logo = await loadImage(logo_path);
-      
-        // Create a canvas
-        const canvas = createCanvas(helmet.width, helmet.height);
-        const ctx = canvas.getContext('2d');
-      
-        // Draw the helmet
-        ctx.drawImage(helmet, 0, 0);
-      
-        // Simulate curved warping
-        const logoWidth = logo.width;
-        const logoHeight = logo.height;
-        const curveHeight = -logo.height*.04; // concave down
-      
-        // logo location
-        const base_height = 550;
-        const center_offset = 360;
-      
-        for (let x = 0; x < logoWidth; x++) {
-            const yOffset = Math.sin((x / logoWidth) * Math.PI) * curveHeight + (x)/logoWidth*20; // Adjust the curve
-            ctx.drawImage(
-                logo,
-                x, 0, 1, logoHeight,       // Source: slice 1px wide
-                center_offset + (helmet.width-logo.width)/2 + x, base_height - yOffset, 1, logoHeight // Destination: warp along the curve
-            );
-        }
-      
-        // Save the result
-        const buffer = canvas.toBuffer('image/png');
-        fs.writeFileSync(output_path, buffer);
-
-
-
-
-
-
-
-
-
-
-
-
-function SingleMockup(company, model, color, certifications, view, PMS1, PMS2, PMS3, PMS4) {
-    this.company = company;
-    this.model = model;
-    this.color = color;
-    this.certifications = certifications;
-    this.view = view;
-    this.PMS = [PMS1, PMS2, PMS3, PMS4];
-    this.logo_width = 3.25;
-
-    this.generateTechpack = async function() {
-        this.techpack = new PDFdoc({
-            size: [1800, 2200]
-        });
-        this.techpack.pipe(fs.createWriteStream('techpack.pdf'));
-
-        // STUDSON logo
-        const studson_logo_path = './american.svg';
-        const studson_logo = fs.readFileSync(studson_logo_path, "utf8");
-        this.techpack.addSVG(studson_logo, 100, 50, {
-            width: 600,
-            height: 105,
-        });
-
-        // CUSTOM BRANDING
-        this.techpack
-            .font("./fonts/Cantarell-Bold.ttf")
-            .fontSize("50")
-            .text("CUSTOM BRANDING", 100, 175, {
-                align: "center",
-                width: 600
-            })
-
-        // TOP INFO/OPTIONS
-        this.techpack
-            .font("./fonts/Cantarell-Regular.ttf")
-            .fontSize(30)
-            .text("DATE:\nCUSTOMER:\nHELMET STYLE:\nCOLOR:\nCERTIFICATIONS:", 800, 50)
-            .text(`${this.getDate()}\n${this.company}\n${this.model}\n${this.color}\n${this.certifications}`, 1100, 50);
-
-        // Warp logo and composite on helmet
-        let helmet_path = "./helmet_renders/fb_back.png";
-        let logo_path = `./temp/${this.view}_logo.png`;
-        let mockup_path = `./temp/${this.view}_mockup.png`;
-        // Convert SVG to PNG
-        await sharp(Buffer.from(studson_logo))
-            .resize(180, 180, {fit: "inside"})  // 2000=front full width
-                                                // 180=back full width
-            .png() // Convert to PNG format
-            .toFile(logo_path); // Save to specified file path
-        
-        await this.backWarpFB(helmet_path, logo_path, mockup_path);
 
         // Insert helmet mockup
         this.techpack.image(mockup_path, 0, 300, {
