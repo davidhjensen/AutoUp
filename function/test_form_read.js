@@ -131,40 +131,45 @@ async function techpackGenerator(fields, files, console) {
         for (let view of fields[key_view]) {
             // Warp logo and composite on helmet
             const helmet_path = generatePath(fields[key_model], fields[key_class], fields[key_color], view);
-            const key_shortcut = `logoType${i + 1}_${view}`;
+            const key_logo_file = `logo${i + 1}_${view}`;
             const logo_path = `../assets/temp/${view}_logo_${i}.png`;
             const mockup_path = `../assets/temp/${view}_mockup_${i}.png`;
             const key_width = `logoWidth${i + 1}_${view}`;
             const key_shift = `logoShift${i + 1}_${view}`;
-            var key_logo_file;
-            var buffer;
+            const key_pms = `pmsCode${i + 1}_${view}[]`;
+            const key_hex = `hexCode${i + 1}_${view}[]`;
+            const key_shortcut = `logoType${i + 1}_${view}`;
 
+            // update logo buffer, width, shift, and pms colors/code as necessary based on logo type
             switch (fields[key_shortcut][0]) {
                 case "New Logo":
-                    key_logo_file = `logo${i + 1}_${view}`;
-                    buffer = files[key_logo_file].buffer;
                     break;
 
                 case "Same Logo":
-                    key_logo_file = `logo1_${view}`;
-                    buffer = files[key_logo_file].buffer;
+                    files[key_logo_file] = files[`logo1_${view}`];
+                    fields[key_width] = fields[`logoWidth1_${view}`];
+                    fields[key_shift] = fields[`logoShift1_${view}`];
+                    fields[key_pms] = fields[`pmsCode1_${view}[]`]
+                    fields[key_hex] = fields[`hexCode1_${view}[]`]
                     break;
 
                 case "American Flag":
-                    buffer = "../assets/logos/american_white.svg";
+                    files[key_logo_file] = {buffer: "../assets/logos/american_white.svg" }; // Store buffer and metadata
+                    fields[key_pms] = ["PMS 187 C", "PMS 5265 C", "WHITE"];
+                    fields[key_hex] = ["A6192E", "403A60", "FFFFFF"];
                     break;
 
                 case "American Flag (transparent)":
-                    buffer = "../assets/logos/american.svg";
+                    files[key_logo_file] = {buffer: "../assets/logos/american.svg" }; // Store buffer and metadata
+                    fields[key_pms] = ["PMS 187 C", "PMS 5265 C"];
+                    fields[key_hex] = ["A6192E", "403A60"];
                     break;
 
                 default:
                     console.log("Unknown logo type...exiting");
                     return;
             }
-            //console.log(buffer);
-            //console.log(typeof buffer);
-            await generateMockup(fields[key_model], view, helmet_path, logo_path, mockup_path, buffer, Number(fields[key_width]), Number(fields[key_shift]), console);
+            await generateMockup(fields[key_model], view, helmet_path, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), console);
 
             // place render
             const render_height = ((["Front", "Back"].includes(view)) ? 1200 : 1050);
@@ -188,10 +193,11 @@ async function techpackGenerator(fields, files, console) {
             //      and that the dimesion line for the logo is 350pt below the anchor
 
             // Logo PMS colors
-            const pms_codes = fields[`pmsCode${i + 1}_${view}[]`];
-            const pms_hex = fields[`hexCode${i + 1}_${view}[]`];
             const x = view_num * 1000 + ((fields[key_view].length == 1) ? 100 : 300);
             const y = 1150;
+            pms_codes = fields[key_pms];
+            pms_hex = fields[key_hex];
+
             if (typeof pms_codes !== 'undefined') {
                 for (let index = 0; index < pms_codes.length; index++) {
                     // square
@@ -303,7 +309,7 @@ async function techpackGenerator(fields, files, console) {
         if (helmet_view == "Front") {
             path = path + ((helmet_class == "Vented Class C") ? "C/" : "E/");
             path = path + helmet_view + "/";
-            path = path + helmet_model + "_TechPack_Front View_";
+            path = path + helmet_model + ((helmet_class == "Vented Class C") ? "_TechPack_Front View_" : "_TechPack Front View_");
             path = path + helmet_color;
             path = path + ((helmet_class == "Vented Class C") ? ".png" : "_E.png");
         } else if (helmet_view == "Back") {
@@ -332,7 +338,6 @@ async function techpackGenerator(fields, files, console) {
 
     // place a logo on a render
     async function generateMockup(model, view, helmet_path, logo_path, mockup_path, logo_buffer, width, shift, console) {
-
 
         const helmet = await loadImage(helmet_path);
         const canvas = createCanvas(helmet.width, helmet.height);
@@ -397,7 +402,7 @@ async function techpackGenerator(fields, files, console) {
                 }
 
                 // Convert SVG to PNG
-                await sharp(Buffer.from(logo_buffer))
+                await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
                     .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
                     .png() // Convert to PNG format
                     .toFile(logo_path); // Save to specified file path
@@ -434,7 +439,7 @@ async function techpackGenerator(fields, files, console) {
                 }
 
                 // Convert SVG to PNG
-                await sharp(Buffer.from(logo_buffer))
+                await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
                     .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
                     .png() // Convert to PNG format
                     .toFile(logo_path); // Save to specified file path
@@ -469,9 +474,8 @@ async function techpackGenerator(fields, files, console) {
                     center_x = 3890;
                     scaler = 560; // pixels per inch
                 }
-                //console.log(`height: ${base_height} | offset`);
                 // Convert SVG to PNG
-                await sharp(Buffer.from(logo_buffer))
+                await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
                     .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
                     .png() // Convert to PNG format
                     .toFile(logo_path); // Save to specified file path
