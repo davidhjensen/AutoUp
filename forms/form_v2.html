@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Mockup Form</title>
+    <style>
+        .mockup-form { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .entry-group { margin-bottom: 10px; }
+        .entry-group div { display: flex; gap: 10px; margin-bottom: 5px; }
+        .entry-group div input, .entry-group div select { flex: 0.3; padding: 5px; font-size: 12px; }
+        .entry-group input { height: 25%; } /* Text input height reduced */
+        select { height: 25%; } /* Dropdown height reduced */
+        h4 { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Product Mockup Form</h1>
+    <form action="http://localhost:3000" method="POST" enctype="multipart/form-data">
+        <label for="companyName">Company Name (required):</label><br>
+        <input type="text" id="companyName" name="companyName" required><br><br>
+
+        <label for="numMockups">Number of Mockups:</label><br>
+        <input type="number" id="numMockups" name="numMockups" min="1" step="1"><br><br>
+
+        <button type="button" id="generateForms">Generate Mockup Forms</button>
+
+        <div id="mockupFormsContainer"></div>
+
+        <input type="hidden" name="submissionId" value="${Date.now()}">
+
+        <br><button type="submit">Submit</button>
+        <button type="reset" onclick="mockupFormsContainer.innerHTML = ''">Reset Form</button>
+    </form>
+
+    <script>
+        const generateFormsButton = document.getElementById('generateForms');
+        const mockupFormsContainer = document.getElementById('mockupFormsContainer');
+
+        generateFormsButton.addEventListener('click', () => {
+            const numMockups = parseInt(document.getElementById('numMockups').value) || 0;
+            mockupFormsContainer.innerHTML = ""; // Clear previous forms
+
+            for (let i = 1; i <= numMockups; i++) {
+                const formDiv = document.createElement('div');
+                formDiv.className = 'mockup-form';
+                formDiv.innerHTML = `
+                    <h3>Mockup ${i}</h3>
+                    <label for="helmetModel${i}">Helmet Model:</label><br>
+                    <select id="helmetModel${i}" name="helmetModel${i}" required>
+                        <option value="Standard Brim">Standard Brim</option>
+                        <option value="Full Brim">Full Brim</option>
+                    </select><br><br>
+
+                    <label for="helmetClass${i}">Helmet Class:</label><br>
+                    <select id="helmetClass${i}" name="helmetClass${i}" required>
+                        <option value="Vented Class C">Vented Class C</option>
+                        <option value="Non-Vented Class E">Non-Vented Class E</option>
+                    </select><br><br>
+
+                    <label for="helmetColor${i}">Helmet Color:</label><br>
+                    <select id="helmetColor${i}" name="helmetColor${i}" required>
+                        option value="Carbon">Carbon</option>
+                        <option value="ForestGreen">ForestGreen</option>
+                        <option value="Gold">Gold</option>
+                        <option value="Green">Green</option>
+                        <option value="Grey">Grey</option>
+                        <option value="HiVisYellow">HiVisYellow</option>
+                        <option value="NavyBlue">NavyBlue</option>
+                        <option value="Orange">Orange</option>
+                        <option value="Pink">Pink</option>
+                        <option value="Red">Red</option>
+                        <option value="SafetyYellow">SafetyYellow</option>
+                        <option value="Teal">Teal</option>
+                        <option value="White">White</option>
+                        <option value="WhiteCarbon">WhiteCarbon</option>
+                        <option value="Khaki">Khaki</option>
+                        <option value="FiberMetal">FiberMetal</option>
+                    </select><br><br>
+
+                    <label for="views${i}">Views (select multiple):</label><br>
+                    <select id="views${i}" name="views${i}[]" multiple required onchange="generateLogoAndPmsFields(${i})">
+                        <option value="Front">Front</option>
+                        <option value="Left">Left</option>
+                        <option value="Right">Right</option>
+                        <option value="Back">Back</option>
+                    </select><br><br>
+
+                    <div id="logosContainer${i}" class="entry-group"></div>
+                `;
+                mockupFormsContainer.appendChild(formDiv);
+            }
+        });
+
+        function generateLogoAndPmsFields(mockupNumber) {
+            const viewsSelect = document.getElementById(`views${mockupNumber}`);
+            const selectedViews = Array.from(viewsSelect.selectedOptions).map(opt => opt.value);
+
+            const container = document.getElementById(`logosContainer${mockupNumber}`);
+            container.innerHTML = ""; // Clear existing fields
+
+            selectedViews.forEach(view => {
+                const section = document.createElement('div');
+                section.innerHTML = `
+                    <h4>${view} View</h4>
+                    <label for="logoType${mockupNumber}_${view}">Logo Type:</label>
+                    <select name="logoType${mockupNumber}_${view}" onchange="updateLogoFields(this, ${mockupNumber}, '${view}')" ${mockupNumber === 1 ? 'disabled' : ''}>
+                        <option value="New Logo" selected>New Logo</option>
+                        <option value="Same Logo">Same Logo</option>
+                        <option value="American Flag">American Flag</option>
+                        <option value="American Flag (transparent)">American Flag (transparent)</option>
+                    </select><br>
+
+                    <div id="logoFields${mockupNumber}_${view}">
+                        <label for="logo${mockupNumber}_${view}">Logo:</label>
+                        <input type="file" name="logo${mockupNumber}_${view}" accept=".svg,.png" required><br>
+
+                        <label for="logoWidth${mockupNumber}_${view}">Width (inches):</label>
+                        <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.1" placeholder="Width (inches)" required><br>
+
+                        <label for="logoShift${mockupNumber}_${view}">Vertical Shift:</label>
+                        <input type="number" name="logoShift${mockupNumber}_${view}" step="0.1" value="0" placeholder="Vertical Shift (inches)" required><br>
+                    </div>
+
+                    <label>PMS Colors:</label>
+                    <div id="pmsColorsContainer${mockupNumber}_${view}" class="entry-group"></div>
+                    <button type="button" onclick="addPmsColor(${mockupNumber}, '${view}')">Add Another PMS Color</button>
+                `;
+                container.appendChild(section);
+            });
+        }
+
+        function updateLogoFields(select, mockupNumber, view) {
+            const logoFields = document.getElementById(`logoFields${mockupNumber}_${view}`);
+            const pmsColorsContainer = document.getElementById(`pmsColorsContainer${mockupNumber}_${view}`);
+            switch (select.value) {
+                case "Same Logo":
+                    logoFields.innerHTML = ""; // Clear fields for "Same Logo"
+                    pmsColorsContainer.innerHTML = ""; // Clear PMS fields
+                    break;
+                case "American Flag":
+                case "American Flag (transparent)":
+                    logoFields.innerHTML = `
+                        <label for="logoWidth${mockupNumber}_${view}">Width (inches):</label>
+                        <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.1" placeholder="Width (inches)" required><br>
+
+                        <label for="logoShift${mockupNumber}_${view}">Vertical Shift:</label>
+                        <input type="number" name="logoShift${mockupNumber}_${view}" step="0.1" value="0" placeholder="Vertical Shift (inches)" required><br>
+                    `;
+                    break;
+                default: // "New Logo"
+                    logoFields.innerHTML = `
+                        <label for="logo${mockupNumber}_${view}">Logo:</label>
+                        <input type="file" name="logo${mockupNumber}_${view}" accept=".svg,.png" required><br>
+
+                        <label for="logoWidth${mockupNumber}_${view}">Width (inches):</label>
+                        <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.1" placeholder="Width (inches)" required><br>
+
+                        <label for="logoShift${mockupNumber}_${view}">Vertical Shift:</label>
+                        <input type="number" name="logoShift${mockupNumber}_${view}" step="0.1" value="0" placeholder="Vertical Shift (inches)" required><br>
+                    `;
+                    break;
+            }
+        }
+
+        function addPmsColor(mockupNumber, view) {
+            const container = document.getElementById(`pmsColorsContainer${mockupNumber}_${view}`);
+            if (container.children.length >= 4) return; // Limit to 4 colors
+            const newEntry = document.createElement('div');
+            newEntry.innerHTML = `
+                <input type="text" name="pmsCode${mockupNumber}_${view}[]" placeholder="PMS Color Code" required>
+                <input type="text" name="hexCode${mockupNumber}_${view}[]" placeholder="Hex Color Code" required>
+                <button type="button" onclick="this.parentNode.remove()">Remove</button>
+            `;
+            container.appendChild(newEntry);
+        }
+    </script>
+</body>
+</html>
