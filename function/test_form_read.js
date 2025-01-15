@@ -298,27 +298,18 @@ async function techpackGenerator(fields, files, console) {
 
     // generate the path to a given render provided helmet model, class, color, and view
     function generatePath(helmet_model, helmet_class, helmet_color, helmet_view) {
-        // front/back: ../assets/renders/C/Back/Full Brim Rear View_Carbon
-        // left/right: ../assets/renders/C/Right/STUDSON_TechPack_FB_C_Carbon-RS.png
         let path = "../assets/renders/";
 
         if (helmet_view == "Front") {
             path = path + ((helmet_class == "Vented Class C") ? "C/" : "E/");
             path = path + helmet_view + "/";
-            if (helmet_class == "Vented Class C") {
-                path = path + helmet_model + " ";
-                path = path + ((helmet_view == "Back") ? "Rear View_" : "Front View_");
-                path = path + helmet_color + ".png";
-            } else {
-                path = path + helmet_model + "_TechPack ";
-                path = path + ((helmet_view == "Back") ? "Rear View_" : "Front View_");
-                path = path + helmet_color + "_";
-                path = path + ((helmet_class == "Vented Class C") ? "C.png" : "E.png");
-            }
+            path = path + helmet_model + "_TechPack_Front View_";
+            path = path + helmet_color;
+            path = path + ((helmet_class == "Vented Class C") ? ".png" : "_E.png");
         } else if (helmet_view == "Back") {
             path = path + "C/";
             path = path + helmet_view + "/";
-            path = path + helmet_model + " ";
+            path = path + helmet_model + "_TechPack_";
             path = path + ((helmet_view == "Back") ? "Rear View_" : "Front View_");
             path = path + helmet_color + ".png";
         } else if (helmet_view == "Left") {
