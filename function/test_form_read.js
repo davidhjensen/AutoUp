@@ -53,7 +53,7 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ fields, files }));
 
         req.pipe(busboy);
-        
+
     } else {
         res.writeHead(404);
         res.end();
@@ -67,17 +67,17 @@ server.listen(3000, () => {
 
 
 // add svg conversion function to PDFdoc
-PDFdoc.prototype.addSVG = function(svg, x, y, options) {
+PDFdoc.prototype.addSVG = function (svg, x, y, options) {
     return SVGtoPDF(this, svg, x, y, options), this;
 };
 
 async function techpackGenerator(fields, files, console) {
-    
+
     // create and pipe the pdf to a blob
-    const techpack = new PDFdoc({autoFirstPage: false});
+    const techpack = new PDFdoc({ autoFirstPage: false });
     const stream = techpack.pipe(blobStream());
     console.log("PDF file initialized");
-    
+
     // pipe to a .pdf file
     techpack.pipe(fs.createWriteStream('techpack.pdf'));
 
@@ -85,14 +85,14 @@ async function techpackGenerator(fields, files, console) {
     for (let i = 0; i < parseInt(fields["numMockups"][0]); i++) {
 
         // generate page size based on number of views
-        const key_view = `views${i+1}[]`;
+        const key_view = `views${i + 1}[]`;
         const num_views = fields[key_view].length;
-        const page_width = 600 + 1000*num_views;
+        const page_width = 600 + 1000 * num_views;
         techpack.addPage({
             size: [page_width, 1650]
         })
         techpack
-            .rect(0,0,page_width, 1650)
+            .rect(0, 0, page_width, 1650)
             .fill("#F5F5F5");
         console.log("Page", i, "added");
 
@@ -103,7 +103,7 @@ async function techpackGenerator(fields, files, console) {
             width: 600,
             height: 105,
         });
-        
+
         // CUSTOM BRANDING
         techpack
             .font("../assets/fonts/Cantarell-Bold.ttf")
@@ -111,12 +111,12 @@ async function techpackGenerator(fields, files, console) {
             .text("CUSTOM BRANDING", 50, 175, {
                 align: "center",
                 width: 600
-        });
+            });
 
         // TOP INFO/OPTIONS
-        const key_model = `helmetModel${i+1}`;
-        const key_class = `helmetClass${i+1}`;
-        const key_color = `helmetColor${i+1}`;
+        const key_model = `helmetModel${i + 1}`;
+        const key_class = `helmetClass${i + 1}`;
+        const key_color = `helmetColor${i + 1}`;
         techpack
             .font("../assets/fonts/Cantarell-Regular.ttf")
             .fillColor("#000000")
@@ -126,29 +126,59 @@ async function techpackGenerator(fields, files, console) {
 
         // Generate each view's mockup
         let view_num = 0;
+
+
         for (let view of fields[key_view]) {
             // Warp logo and composite on helmet
             const helmet_path = generatePath(fields[key_model], fields[key_class], fields[key_color], view);
-            const key_logo_file = `logo${i+1}_${view}`;
+            const key_shortcut = `logoType${i + 1}_${view}`;
             const logo_path = `../assets/temp/${view}_logo_${i}.png`;
             const mockup_path = `../assets/temp/${view}_mockup_${i}.png`;
-            const key_width = `logoWidth${i+1}_${view}`;
-            const key_shift = `logoShift${i+1}_${view}`;
-            await generateMockup(fields[key_model], view, helmet_path, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), console);
+            const key_width = `logoWidth${i + 1}_${view}`;
+            const key_shift = `logoShift${i + 1}_${view}`;
+            var key_logo_file;
+            var buffer;
+
+            switch (fields[key_shortcut][0]) {
+                case "New Logo":
+                    key_logo_file = `logo${i + 1}_${view}`;
+                    buffer = files[key_logo_file].buffer;
+                    break;
+
+                case "Same Logo":
+                    key_logo_file = `logo1_${view}`;
+                    buffer = files[key_logo_file].buffer;
+                    break;
+
+                case "American Flag":
+                    buffer = "../assets/logos/american_white.svg";
+                    break;
+
+                case "American Flag (transparent)":
+                    buffer = "../assets/logos/american.svg";
+                    break;
+
+                default:
+                    console.log("Unknown logo type...exiting");
+                    return;
+            }
+            //console.log(buffer);
+            //console.log(typeof buffer);
+            await generateMockup(fields[key_model], view, helmet_path, logo_path, mockup_path, buffer, Number(fields[key_width]), Number(fields[key_shift]), console);
 
             // place render
             const render_height = ((["Front", "Back"].includes(view)) ? 1200 : 1050);
             const render_placement_y = ((["Front", "Back"].includes(view)) ? 300 : 375);
 
-            techpack.image(mockup_path, 100 + view_num*1000, render_placement_y, {
+            techpack.image(mockup_path, 100 + view_num * 1000, render_placement_y, {
                 fit: [1400, render_height],
                 align: "center",
             });
             techpack
                 .font("../assets/fonts/Cantarell-Bold.ttf")
                 .fontSize(30)
-                .fillColor([0,0,0,100])
-                .text(`${view}`, 300+view_num*1000, 1000, {
+                .fillColor([0, 0, 0, 100])
+                .text(`${view}`, 300 + view_num * 1000, 1000, {
                     width: 1000,
                     align: "center"
                 });
@@ -158,24 +188,26 @@ async function techpackGenerator(fields, files, console) {
             //      and that the dimesion line for the logo is 350pt below the anchor
 
             // Logo PMS colors
-            const pms_codes = fields[`pmsCode${i+1}_${view}[]`];
-            const pms_hex = fields[`hexCode${i+1}_${view}[]`];
-            const x = view_num*1000 + ((fields[key_view].length==1) ? 100 : 300);
+            const pms_codes = fields[`pmsCode${i + 1}_${view}[]`];
+            const pms_hex = fields[`hexCode${i + 1}_${view}[]`];
+            const x = view_num * 1000 + ((fields[key_view].length == 1) ? 100 : 300);
             const y = 1150;
-            for (let index = 0; index < pms_codes.length; index++) {
-                // square
-                techpack
-                    .fillColor(`#${pms_hex[index]}`)
-                    .rect(x, y + 75*index, 50, 50)
-                    .fill();
-                // text
-                techpack
-                    .font("../assets/fonts/Cantarell-Regular.ttf")
-                    .fontSize(30)
-                    .fillColor([0,100,0,0])
-                    .text(`${pms_codes[index]}`, x + 75, y + 25 + 75*index, {
-                        baseline: "middle",
-                    });
+            if (typeof pms_codes !== 'undefined') {
+                for (let index = 0; index < pms_codes.length; index++) {
+                    // square
+                    techpack
+                        .fillColor(`#${pms_hex[index]}`)
+                        .rect(x, y + 75 * index, 50, 50)
+                        .fill();
+                    // text
+                    techpack
+                        .font("../assets/fonts/Cantarell-Regular.ttf")
+                        .fontSize(30)
+                        .fillColor([0, 100, 0, 0])
+                        .text(`${pms_codes[index]}`, x + 75, y + 25 + 75 * index, {
+                            baseline: "middle",
+                        });
+                }
             }
 
             // Dimensioned logo
@@ -186,7 +218,7 @@ async function techpackGenerator(fields, files, console) {
 
             // logo dimensions
             techpack
-                .strokeColor([0,100,0,0])
+                .strokeColor([0, 100, 0, 0])
                 .lineWidth(2)
                 .moveTo(x + 400, y + 325)
                 .lineTo(x + 400, y + 350)
@@ -196,7 +228,7 @@ async function techpackGenerator(fields, files, console) {
             techpack
                 .font("../assets/fonts/Cantarell-Regular.ttf")
                 .fontSize(30)
-                .fillColor([0,100,0,0])
+                .fillColor([0, 100, 0, 0])
                 .text(`${fields[key_width]} in`, x + 400, y + 375, {
                     align: "center",
                     width: 400
@@ -216,43 +248,43 @@ async function techpackGenerator(fields, files, console) {
         techpack
             .font("../assets/fonts/Cantarell-Regular.ttf")
             .fontSize(20)
-            .fillColor([0,100,0,0])
+            .fillColor([0, 100, 0, 0])
             .text("FINAL ARTWORK AT 100% ACTUAL SIZE", 100, 1050);
 
         // Signature box
-        const signature_x = ((num_views==1) ? 1000 : 1700);
-        const signature_y = ((num_views==1) ? 1350 : 50);
+        const signature_x = ((num_views == 1) ? 1000 : 1700);
+        const signature_y = ((num_views == 1) ? 1350 : 50);
         techpack
-            .strokeColor([0,0,0,100])
+            .strokeColor([0, 0, 0, 100])
             .lineWidth(1)
             .rect(signature_x, signature_y, 500, 150)
-            .moveTo(signature_x+20, signature_y+130)
-            .lineTo(signature_x+395, signature_y+130)
-            .moveTo(signature_x+405, signature_y+130)
-            .lineTo(signature_x+480, signature_y+130)
+            .moveTo(signature_x + 20, signature_y + 130)
+            .lineTo(signature_x + 395, signature_y + 130)
+            .moveTo(signature_x + 405, signature_y + 130)
+            .lineTo(signature_x + 480, signature_y + 130)
             .stroke();
         techpack
             .font("../assets/fonts/Cantarell-Bold.ttf")
             .fontSize(10)
-            .fillColor([0,0,0,100])
-            .text("SIGNATURE FOR APPROVAL", signature_x+20, signature_y+132, {
+            .fillColor([0, 0, 0, 100])
+            .text("SIGNATURE FOR APPROVAL", signature_x + 20, signature_y + 132, {
                 align: "center",
-                width: 295-20
+                width: 295 - 20
             })
-            .text("DATE", signature_x+405, signature_y+132, {
+            .text("DATE", signature_x + 405, signature_y + 132, {
                 align: "center",
-                width: 380-305
+                width: 380 - 305
             })
     }
 
     await fs.readdir("../assets/temp", (err, files) => {
         for (let file of files) {
             fs.unlink(`../assets/temp/${file}`, (err) => {
-              if (err) throw err;
+                if (err) throw err;
             });
         }
     });
-    
+
     techpack.end();
 
     // return date string in format mm/dd/yyyy
@@ -269,39 +301,39 @@ async function techpackGenerator(fields, files, console) {
         // front/back: ../assets/renders/C/Back/Full Brim Rear View_Carbon
         // left/right: ../assets/renders/C/Right/STUDSON_TechPack_FB_C_Carbon-RS.png
         let path = "../assets/renders/";
-        
-        if(helmet_view=="Front") {
-            path = path + ((helmet_class=="Vented Class C") ? "C/" : "E/");
+
+        if (helmet_view == "Front") {
+            path = path + ((helmet_class == "Vented Class C") ? "C/" : "E/");
             path = path + helmet_view + "/";
-            if(helmet_class=="Vented Class C") {
+            if (helmet_class == "Vented Class C") {
                 path = path + helmet_model + " ";
-                path = path + ((helmet_view=="Back") ? "Rear View_" : "Front View_");
+                path = path + ((helmet_view == "Back") ? "Rear View_" : "Front View_");
                 path = path + helmet_color + ".png";
             } else {
                 path = path + helmet_model + "_TechPack ";
-                path = path + ((helmet_view=="Back") ? "Rear View_" : "Front View_");
+                path = path + ((helmet_view == "Back") ? "Rear View_" : "Front View_");
                 path = path + helmet_color + "_";
-                path = path + ((helmet_class=="Vented Class C") ? "C.png" : "E.png");
+                path = path + ((helmet_class == "Vented Class C") ? "C.png" : "E.png");
             }
-        } else if(helmet_view=="Back") {
+        } else if (helmet_view == "Back") {
             path = path + "C/";
             path = path + helmet_view + "/";
             path = path + helmet_model + " ";
-            path = path + ((helmet_view=="Back") ? "Rear View_" : "Front View_");
+            path = path + ((helmet_view == "Back") ? "Rear View_" : "Front View_");
             path = path + helmet_color + ".png";
-        } else if(helmet_view=="Left") {
-            path = path + ((helmet_class=="Vented Class C") ? "C/" : "E/");
-            path = path + ((helmet_view=="Left") ? "Left Side/" : "Right Side/");
+        } else if (helmet_view == "Left") {
+            path = path + ((helmet_class == "Vented Class C") ? "C/" : "E/");
+            path = path + ((helmet_view == "Left") ? "Left Side/" : "Right Side/");
             path = path + "STUDSON_TechPack_";
-            path = path + ((helmet_model=="Standard Brim") ? "SB_" : "FB_");
-            path = path + ((helmet_class=="Vented Class C") ? "C_" : "E_");
+            path = path + ((helmet_model == "Standard Brim") ? "SB_" : "FB_");
+            path = path + ((helmet_class == "Vented Class C") ? "C_" : "E_");
             path = path + helmet_color + ".png";
         } else {
-            path = path + ((helmet_class=="Vented Class C") ? "C/" : "E/");
-            path = path + ((helmet_view=="Left") ? "Left Side/" : "Right Side/");
+            path = path + ((helmet_class == "Vented Class C") ? "C/" : "E/");
+            path = path + ((helmet_view == "Left") ? "Left Side/" : "Right Side/");
             path = path + "STUDSON_TechPack_";
-            path = path + ((helmet_model=="Standard Brim") ? "SB_" : "FB_");
-            path = path + ((helmet_class=="Vented Class C") ? "C_" : "E_");
+            path = path + ((helmet_model == "Standard Brim") ? "SB_" : "FB_");
+            path = path + ((helmet_class == "Vented Class C") ? "C_" : "E_");
             path = path + helmet_color + "-RS.png";
         }
         return path;
@@ -309,6 +341,7 @@ async function techpackGenerator(fields, files, console) {
 
     // place a logo on a render
     async function generateMockup(model, view, helmet_path, logo_path, mockup_path, logo_buffer, width, shift, console) {
+
 
         const helmet = await loadImage(helmet_path);
         const canvas = createCanvas(helmet.width, helmet.height);
@@ -322,12 +355,12 @@ async function techpackGenerator(fields, files, console) {
         let logo;
         let logoWidth;
         let logoHeight;
-        let curveHeight; 
+        let curveHeight;
 
-        switch(view) {
+        switch (view) {
             case "Front":
                 // logo location and scale
-                if(model=="Standard Brim") {
+                if (model == "Standard Brim") {
                     base_height = 2870;
                     center_offset = 3900;
                 } else {
@@ -337,8 +370,8 @@ async function techpackGenerator(fields, files, console) {
                 scaler = 492; // pixels per inch
 
                 // Convert SVG to PNG
-                await sharp(Buffer.from(logo_buffer))
-                    .resize(Math.round(width*scaler), Math.round(5*width*scaler), {fit: "inside"}) // fit WIDTH only to provided width (5x limit on height)
+                await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
+                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
                     .png() // Convert to PNG format
                     .toFile(logo_path); // Save to specified file path
                 logo = await loadImage(logo_path);
@@ -346,12 +379,12 @@ async function techpackGenerator(fields, files, console) {
                 // Simulate curved warping
                 logoWidth = logo.width;
                 logoHeight = logo.height;
-                curveHeight = -logo.height*.005; // concave down
-            
+                curveHeight = -logo.height * .005; // concave down
+
                 for (let x = 0; x < logoWidth; x++) {
                     yOffset = Math.sin((x / logoWidth) * Math.PI) * curveHeight;  // curve logo
-                    slice_x = Math.round(center_offset - logo.width/2 + x);                   // center shifted back half the distnace of the logo written left to right
-                    slice_y = Math.round(base_height - yOffset - logo.height - shift*scaler); // base height shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    slice_x = Math.round(center_offset - logo.width / 2 + x);                   // center shifted back half the distnace of the logo written left to right
+                    slice_y = Math.round(base_height - yOffset - logo.height - shift * scaler); // base height shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
                     ctx.drawImage(
                         logo,
                         x, 0, 1, logoHeight,       // Source: slice 1px wide
@@ -362,7 +395,7 @@ async function techpackGenerator(fields, files, console) {
 
             case "Left":
                 // logo location and scale
-                if(model=="Standard Brim") {
+                if (model == "Standard Brim") {
                     center_y = 660;
                     center_x = 1780;
                     scaler = 300; // pixels per inch
@@ -374,7 +407,7 @@ async function techpackGenerator(fields, files, console) {
 
                 // Convert SVG to PNG
                 await sharp(Buffer.from(logo_buffer))
-                    .resize(Math.round(width*scaler), Math.round(5*width*scaler), {fit: "inside"}) // fit WIDTH only to provided width (5x limit on height)
+                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
                     .png() // Convert to PNG format
                     .toFile(logo_path); // Save to specified file path
                 logo = await loadImage(logo_path);
@@ -384,22 +417,22 @@ async function techpackGenerator(fields, files, console) {
                 logoHeight = logo.height;
                 curveHeight = 20; // concave down
                 compression = .65;
-                
+
                 for (let x = 0; x < logoWidth; x++) {
                     yOffset = Math.sin((x / (logoWidth)) * Math.PI) * curveHeight;                // curve logo
-                    slice_x = Math.round(center_x - logo.width/2 + x);                          // center shifted back half the distnace of the logo written left to right
-                    slice_y = Math.round(center_y - yOffset - logo.height/2 - shift*scaler);    // center shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    slice_x = Math.round(center_x - logo.width / 2 + x);                          // center shifted back half the distnace of the logo written left to right
+                    slice_y = Math.round(center_y - yOffset - logo.height / 2 - shift * scaler);    // center shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
                     ctx.drawImage(
                         logo,
                         x, 0, 1, logoHeight,       // Source: slice 1px wide
-                        slice_x, slice_y, 1, logoHeight*compression // Destination: warp along the curve
+                        slice_x, slice_y, 1, logoHeight * compression // Destination: warp along the curve
                     );
                 }
                 break;
 
             case "Right":
                 // logo location and scale
-                if(model=="Standard Brim") {
+                if (model == "Standard Brim") {
                     center_y = 660;
                     center_x = 1580;
                     scaler = 300; // pixels per inch
@@ -411,7 +444,7 @@ async function techpackGenerator(fields, files, console) {
 
                 // Convert SVG to PNG
                 await sharp(Buffer.from(logo_buffer))
-                    .resize(Math.round(width*scaler), Math.round(5*width*scaler), {fit: "inside"}) // fit WIDTH only to provided width (5x limit on height)
+                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
                     .png() // Convert to PNG format
                     .toFile(logo_path); // Save to specified file path
                 logo = await loadImage(logo_path);
@@ -421,22 +454,22 @@ async function techpackGenerator(fields, files, console) {
                 logoHeight = logo.height;
                 curveHeight = 20; // concave down
                 compression = .65;
-                
+
                 for (let x = 0; x < logoWidth; x++) {
                     yOffset = Math.sin((x / (logoWidth)) * Math.PI) * curveHeight;                // curve logo
-                    slice_x = Math.round(center_x - logo.width/2 + x);                          // center shifted back half the distnace of the logo written left to right
-                    slice_y = Math.round(center_y - yOffset - logo.height/2 - shift*scaler);    // center shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    slice_x = Math.round(center_x - logo.width / 2 + x);                          // center shifted back half the distnace of the logo written left to right
+                    slice_y = Math.round(center_y - yOffset - logo.height / 2 - shift * scaler);    // center shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
                     ctx.drawImage(
                         logo,
                         x, 0, 1, logoHeight,       // Source: slice 1px wide
-                        slice_x, slice_y, 1, logoHeight*compression // Destination: warp along the curve
+                        slice_x, slice_y, 1, logoHeight * compression // Destination: warp along the curve
                     );
                 }
                 break;
 
             case "Back":
                 // logo location and scale
-                if(model=="Standard Brim") {
+                if (model == "Standard Brim") {
                     center_y = 2250;
                     center_x = 3920;
                     scaler = 540; // pixels per inch
@@ -448,7 +481,7 @@ async function techpackGenerator(fields, files, console) {
                 //console.log(`height: ${base_height} | offset`);
                 // Convert SVG to PNG
                 await sharp(Buffer.from(logo_buffer))
-                    .resize(Math.round(width*scaler), Math.round(5*width*scaler), {fit: "inside"}) // fit WIDTH only to provided width (5x limit on height)
+                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
                     .png() // Convert to PNG format
                     .toFile(logo_path); // Save to specified file path
                 logo = await loadImage(logo_path);
@@ -456,12 +489,12 @@ async function techpackGenerator(fields, files, console) {
                 // Simulate curved warping
                 logoWidth = logo.width;
                 logoHeight = logo.height;
-                curveHeight = -logo.height*0; // no curve
-            
+                curveHeight = -logo.height * 0; // no curve
+
                 for (let x = 0; x < logoWidth; x++) {
                     yOffset = Math.sin((x / logoWidth) * Math.PI) * curveHeight;  // curve logo
-                    slice_x = Math.round(center_x - logo.width/2 + x);                   // center shifted back half the distnace of the logo written left to right
-                    slice_y = Math.round(center_y - yOffset - logo.height/2 - shift*scaler); // center shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    slice_x = Math.round(center_x - logo.width / 2 + x);                   // center shifted back half the distnace of the logo written left to right
+                    slice_y = Math.round(center_y - yOffset - logo.height / 2 - shift * scaler); // center shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
                     ctx.drawImage(
                         logo,
                         x, 0, 1, logoHeight,       // Source: slice 1px wide
@@ -471,7 +504,7 @@ async function techpackGenerator(fields, files, console) {
                 break;
 
             default:
-                console.log("Unknow view provided: note in {Front, Left, Right, Back}");                
+                console.log("Unknow view provided: note in {Front, Left, Right, Back}");
         }
         // Save the result
         const buffer = canvas.toBuffer('image/png');
