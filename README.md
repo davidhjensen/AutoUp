@@ -1,2 +1,3 @@
 # AutoUp: An Automated Techpack Generator
-The end goal is to have an HTML form that can be filled out with required info for a complete techpack. The techpack PDF will then be returned using an Azure function. [This](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-node?pivot=nodejs-model-v3&pivots=nodejs-model-v4) tuturial was used to set up the development environment in VS Code.
+This project provides functionality to automatically generate product mockups for sales reps. This is done (for now) through a local HTML form that is parsed and used to generate a mockup using JavaScript.
+For now, run `test_form_read.js` by running `node test_form_read.js`. Then, fill out `form_v2.html` in `forms/`. The generated techpack is saved to `function/techpack.pdf`.
