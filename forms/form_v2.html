@@ -60,22 +60,26 @@
 
                     <label for="helmetColor${i}">Helmet Color:</label><br>
                     <select id="helmetColor${i}" name="helmetColor${i}" required>
-                        option value="Carbon">Carbon</option>
+                        <option value="FiberMetal">FiberMetal</option>
                         <option value="ForestGreen">ForestGreen</option>
                         <option value="Gold">Gold</option>
                         <option value="Green">Green</option>
-                        <option value="Grey">Grey</option>
                         <option value="HiVisYellow">HiVisYellow</option>
+                        <option value="Khaki">Khaki</option>
                         <option value="NavyBlue">NavyBlue</option>
                         <option value="Orange">Orange</option>
+                        <option value="PreformanceBlue">PreformanceBlue</option>
                         <option value="Pink">Pink</option>
+                        <option value="Purple">Purple</option>
                         <option value="Red">Red</option>
                         <option value="SafetyYellow">SafetyYellow</option>
                         <option value="Teal">Teal</option>
                         <option value="White">White</option>
                         <option value="WhiteCarbon">WhiteCarbon</option>
-                        <option value="Khaki">Khaki</option>
-                        <option value="FiberMetal">FiberMetal</option>
+                        <option value="Black">Black</option>
+                        <option value="RoyalBlue">RoyalBlue</option>
+                        <option value="Grey">Grey</option>
+                        <option value="Carbon">Carbon</option>                        
                     </select><br><br>
 
                     <label for="views${i}">Views (select multiple):</label><br>
@@ -104,9 +108,9 @@
                 section.innerHTML = `
                     <h4>${view} View</h4>
                     <label for="logoType${mockupNumber}_${view}">Logo Type:</label>
-                    <select name="logoType${mockupNumber}_${view}" onchange="updateLogoFields(this, ${mockupNumber}, '${view}')" ${mockupNumber === 1 ? 'disabled' : ''}>
+                    <select name="logoType${mockupNumber}_${view}" onchange="updateLogoFields(this, ${mockupNumber}, '${view}')"}>
                         <option value="New Logo" selected>New Logo</option>
-                        <option value="Same Logo">Same Logo</option>
+                        <option value="Same Logo" ${mockupNumber === 1 ? 'disabled' : ''}>Same Logo</option>
                         <option value="American Flag">American Flag</option>
                         <option value="American Flag (transparent)">American Flag (transparent)</option>
                     </select><br>
