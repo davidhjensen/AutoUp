@@ -49,12 +49,12 @@
                     <label for="helmetModel${i}">Helmet Model:</label><br>
                     <select id="helmetModel${i}" name="helmetModel${i}" required>
                         <option value="Standard Brim">Standard Brim</option>
-                        <option value="Full Brim">Full Brim</option>
+                        <option value="Full Brim" selected="selected">Full Brim</option>
                     </select><br><br>
 
                     <label for="helmetClass${i}">Helmet Class:</label><br>
                     <select id="helmetClass${i}" name="helmetClass${i}" required>
-                        <option value="Vented Class C">Vented Class C</option>
+                        <option value="Vented Class C" selected="selected">Vented Class C</option>
                         <option value="Non-Vented Class E">Non-Vented Class E</option>
                     </select><br><br>
 
@@ -74,7 +74,7 @@
                         <option value="Red">Red</option>
                         <option value="SafetyYellow">SafetyYellow</option>
                         <option value="Teal">Teal</option>
-                        <option value="White">White</option>
+                        <option value="White" selected="selected">White</option>
                         <option value="WhiteCarbon">WhiteCarbon</option>
                         <option value="Black">Black</option>
                         <option value="RoyalBlue">RoyalBlue</option>
@@ -110,7 +110,7 @@
                     <label for="logoType${mockupNumber}_${view}">Logo Type:</label>
                     <select name="logoType${mockupNumber}_${view}" onchange="updateLogoFields(this, ${mockupNumber}, '${view}')"}>
                         <option value="New Logo" selected>New Logo</option>
-                        <option value="Same Logo" ${mockupNumber === 1 ? 'disabled' : ''}>Same Logo</option>
+                        <option value="Same Logo (as previous)" ${mockupNumber === 1 ? 'disabled' : ''}>Same Logo (as previous)</option>
                         <option value="American Flag">American Flag</option>
                         <option value="American Flag (transparent)">American Flag (transparent)</option>
                     </select><br>
@@ -138,8 +138,8 @@
             const logoFields = document.getElementById(`logoFields${mockupNumber}_${view}`);
             const pmsColorsContainer = document.getElementById(`pmsColorsContainer${mockupNumber}_${view}`);
             switch (select.value) {
-                case "Same Logo":
-                    logoFields.innerHTML = ""; // Clear fields for "Same Logo"
+                case "Same Logo (as previous)":
+                    logoFields.innerHTML = ""; // Clear fields for "Same Logo (as previous)"
                     pmsColorsContainer.innerHTML = ""; // Clear PMS fields
                     break;
                 case "American Flag":
