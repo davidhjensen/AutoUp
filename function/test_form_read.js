@@ -145,12 +145,12 @@ async function techpackGenerator(fields, files, console) {
                 case "New Logo":
                     break;
 
-                case "Same Logo":
-                    files[key_logo_file] = files[`logo1_${view}`];
-                    fields[key_width] = fields[`logoWidth1_${view}`];
-                    fields[key_shift] = fields[`logoShift1_${view}`];
-                    fields[key_pms] = fields[`pmsCode1_${view}[]`]
-                    fields[key_hex] = fields[`hexCode1_${view}[]`]
+                case "Same Logo (as previous)":
+                    files[key_logo_file] = files[`logo${i}_${view}`];
+                    fields[key_width] = fields[`logoWidth${i}_${view}`];
+                    fields[key_shift] = fields[`logoShift${i}_${view}`];
+                    fields[key_pms] = fields[`pmsCode${i}_${view}[]`]
+                    fields[key_hex] = fields[`hexCode${i}_${view}[]`]
                     break;
 
                 case "American Flag":
