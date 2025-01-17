@@ -1084,7 +1084,7 @@
             newEntry.innerHTML = `
                 <select name="pmsColor${mockupNumber}_${view}[]" style="width: 200px; height: 35px;" onchange="updatePmsArrays(this, ${mockupNumber}, '${view}')" required>
                     <option value="" disabled selected>Select PMS Color</option>
-                    ${Object.entries(pmsColors).map(([key, value]) => `<option value="${key}" data-hex="${value}">${key}</option>`).join('')}
+                    ${Object.entries(pmsColors).map(([key, value]) => `<option value="${key},${value}">${key}</option>`).join('')}
                 </select>
                 <button type="button" onclick="removePmsColor(this, ${mockupNumber}, '${view}')">Remove</button>
             `;
