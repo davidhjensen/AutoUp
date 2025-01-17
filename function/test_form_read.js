@@ -13,6 +13,7 @@ const server = http.createServer((req, res) => {
         const busboy = Busboy({ headers: req.headers });
         const fields = {};
         const files = {};
+        let company_name;
 
         // read and store fields
         busboy.on('field', (fieldname, val) => {
@@ -21,6 +22,9 @@ const server = http.createServer((req, res) => {
                 fields[fieldname].push(val);
             } else {
                 fields[fieldname] = [val];
+            }
+            if (fieldname=="companyName") {
+                company_name = val;
             }
         });
 
@@ -44,13 +48,11 @@ const server = http.createServer((req, res) => {
         busboy.on('finish', () => {
             console.log('Form parsing compvared');
             console.log(fields);
-            techpackGenerator(fields, files, console);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${company_name.toLowerCase().split(" ").join("_")}_techpack.pdf"`);
+            techpackGenerator(fields, files, console, res);
 
         });
-
-        // return compvared techpack
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ fields, files }));
 
         req.pipe(busboy);
 
@@ -71,15 +73,15 @@ PDFdoc.prototype.addSVG = function (svg, x, y, options) {
     return SVGtoPDF(this, svg, x, y, options), this;
 };
 
-async function techpackGenerator(fields, files, console) {
+async function techpackGenerator(fields, files, console, res) {
 
     // create and pipe the pdf to a blob
     const techpack = new PDFdoc({ autoFirstPage: false });
     const stream = techpack.pipe(blobStream());
     console.log("PDF file initialized");
 
-    // pipe to a .pdf file
-    techpack.pipe(fs.createWriteStream('techpack.pdf'));
+    // pipe to response
+    techpack.pipe(res);
 
     // generate each page in the techpack
     for (let i = 0; i < parseInt(fields["numMockups"][0]); i++) {
