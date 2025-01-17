@@ -136,8 +136,7 @@ async function techpackGenerator(fields, files, console) {
             const mockup_path = `../assets/temp/${view}_mockup_${i}.png`;
             const key_width = `logoWidth${i + 1}_${view}`;
             const key_shift = `logoShift${i + 1}_${view}`;
-            const key_pms = `pmsCode${i + 1}_${view}[]`;
-            const key_hex = `hexCode${i + 1}_${view}[]`;
+            const key_pms = `pmsColor${i + 1}_${view}[]`;
             const key_shortcut = `logoType${i + 1}_${view}`;
 
             // update logo buffer, width, shift, and pms colors/code as necessary based on logo type
@@ -149,20 +148,17 @@ async function techpackGenerator(fields, files, console) {
                     files[key_logo_file] = files[`logo${i}_${view}`];
                     fields[key_width] = fields[`logoWidth${i}_${view}`];
                     fields[key_shift] = fields[`logoShift${i}_${view}`];
-                    fields[key_pms] = fields[`pmsCode${i}_${view}[]`]
-                    fields[key_hex] = fields[`hexCode${i}_${view}[]`]
+                    fields[key_pms] = fields[`pmsColor${i}_${view}[]`]
                     break;
 
                 case "American Flag":
                     files[key_logo_file] = {buffer: "../assets/logos/american_white.svg" }; // Store buffer and metadata
-                    fields[key_pms] = ["PMS 187 C", "PMS 5265 C", "WHITE"];
-                    fields[key_hex] = ["A6192E", "403A60", "FFFFFF"];
+                    fields[key_pms] = ["PMS 187 C,A6192E", "PMS 5265 C,403A60", "WHITE,FFFFFF"];
                     break;
 
                 case "American Flag (transparent)":
                     files[key_logo_file] = {buffer: "../assets/logos/american.svg" }; // Store buffer and metadata
-                    fields[key_pms] = ["PMS 187 C", "PMS 5265 C"];
-                    fields[key_hex] = ["A6192E", "403A60"];
+                    fields[key_pms] = ["PMS 187 C,A6192E", "PMS 5265 C,403A60"];
                     break;
 
                 default:
@@ -195,14 +191,13 @@ async function techpackGenerator(fields, files, console) {
             // Logo PMS colors
             const x = view_num * 1000 + ((fields[key_view].length == 1) ? 100 : 300);
             const y = 1150;
-            pms_codes = fields[key_pms];
-            pms_hex = fields[key_hex];
+            let pms_colors = fields[key_pms];
 
-            if (typeof pms_codes !== 'undefined') {
-                for (let index = 0; index < pms_codes.length; index++) {
+            if (typeof pms_colors !== 'undefined') {
+                for (let index = 0; index < pms_colors.length; index++) {
                     // square
                     techpack
-                        .fillColor(`#${pms_hex[index]}`)
+                        .fillColor(`#${pms_colors[index].split(",")[1]}`)
                         .rect(x, y + 75 * index, 50, 50)
                         .fill();
                     // text
@@ -210,7 +205,7 @@ async function techpackGenerator(fields, files, console) {
                         .font("../assets/fonts/Cantarell-Regular.ttf")
                         .fontSize(30)
                         .fillColor([0, 100, 0, 0])
-                        .text(`${pms_codes[index]}`, x + 75, y + 25 + 75 * index, {
+                        .text(`PMS ${pms_colors[index].split(",")[0]}`, x + 75, y + 25 + 75 * index, {
                             baseline: "middle",
                         });
                 }
