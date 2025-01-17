@@ -303,35 +303,15 @@ async function techpackGenerator(fields, files, console) {
     }
 
     // generate the path to a given render provided helmet model, class, color, and view
+    // format for filename is <FB/SB>_<C/E>_<CamelCaseColor>_<F/L/R/B>
+    // NOTE: there are only class C renders for the back since they are not different from class E renders
     function generatePath(helmet_model, helmet_class, helmet_color, helmet_view) {
-        let path = "../assets/renders/";
-
-        if (helmet_view == "Front") {
-            path = path + ((helmet_class == "Vented Class C") ? "C/" : "E/");
-            path = path + helmet_view + "/";
-            path = path + helmet_model + ((helmet_class == "Vented Class C") ? "_TechPack_Front View_" : "_TechPack Front View_");
-            path = path + helmet_color;
-            path = path + ((helmet_class == "Vented Class C") ? ".png" : "_E.png");
-        } else if (helmet_view == "Back") {
-            path = path + "C/";
-            path = path + helmet_view + "/";
-            path = path + helmet_model + "_TechPack_";
-            path = path + ((helmet_view == "Back") ? "Rear View_" : "Front View_");
-            path = path + helmet_color + ".png";
-        } else if (helmet_view == "Left") {
-            path = path + ((helmet_class == "Vented Class C") ? "C/" : "E/");
-            path = path + ((helmet_view == "Left") ? "Left Side/" : "Right Side/");
-            path = path + "STUDSON_TechPack_";
-            path = path + ((helmet_model == "Standard Brim") ? "SB_" : "FB_");
-            path = path + ((helmet_class == "Vented Class C") ? "C_" : "E_");
-            path = path + helmet_color + ".png";
+        
+        let folder = "../assets/renders";
+        if (helmet_view == "Back") {
+            path = `${folder}/${(helmet_model == "Standard Brim") ? "SB" : "FB"}_C_${helmet_color}_${Array.from(helmet_view)[0]}.png`;
         } else {
-            path = path + ((helmet_class == "Vented Class C") ? "C/" : "E/");
-            path = path + ((helmet_view == "Left") ? "Left Side/" : "Right Side/");
-            path = path + "STUDSON_TechPack_";
-            path = path + ((helmet_model == "Standard Brim") ? "SB_" : "FB_");
-            path = path + ((helmet_class == "Vented Class C") ? "C_" : "E_");
-            path = path + helmet_color + "-RS.png";
+            path = `${folder}/${(helmet_model == "Standard Brim") ? "SB" : "FB"}_${(helmet_class == "Vented Class C") ? "C" : "E"}_${helmet_color}_${Array.from(helmet_view)[0]}.png`;
         }
         return path;
     }
