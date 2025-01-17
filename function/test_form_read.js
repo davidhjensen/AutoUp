@@ -476,8 +476,12 @@ async function techpackGenerator(fields, files, console) {
             default:
                 console.log("Unknow view provided: note in {Front, Left, Right, Back}");
         }
-        // Save the result
+
+        // Save the result, downscaling for smaller file size
         const buffer = canvas.toBuffer('image/png');
-        fs.writeFileSync(mockup_path, buffer);
+        await sharp(buffer)
+            .resize(2500, 2500, {fit: "inside"}) 
+            .png() 
+            .toFile(mockup_path);
     }
 }
