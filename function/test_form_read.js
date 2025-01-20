@@ -203,11 +203,13 @@ async function techpackGenerator(fields, files, console, res) {
                         .rect(x, y + 75 * index, 50, 50)
                         .fill();
                     // text
+                    let color_name = pms_colors[index].split(",")[0];
+                    color_name = (isNaN(parseInt(color_name[0]))) ? `${color_name} C` : `PMS ${color_name} C`;
                     techpack
                         .font("../assets/fonts/Cantarell-Regular.ttf")
                         .fontSize(30)
                         .fillColor([0, 100, 0, 0])
-                        .text(`PMS ${pms_colors[index].split(",")[0]}`, x + 75, y + 25 + 75 * index, {
+                        .text(`${color_name}`, x + 75, y + 25 + 75 * index, {
                             baseline: "middle",
                         });
                 }
