@@ -1121,7 +1121,7 @@
 
         function addPmsColor(mockupNumber, view) {
             const container = document.getElementById(`pmsColorsContainer${mockupNumber}_${view}`);
-            if (container.children.length >= 4) return; // Limit to 4 colors
+            if (container.children.length >= 6) return; // Limit to 6 colors
 
             const newEntry = document.createElement('div');
             newEntry.innerHTML = `
