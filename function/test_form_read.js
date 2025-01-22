@@ -163,6 +163,16 @@ async function techpackGenerator(fields, files, console, res) {
                     fields[key_pms] = ["187,A6192E", "5265,403A60"];
                     break;
 
+                case "American Flag (reverse)":
+                    files[key_logo_file] = {buffer: "../assets/logos/american_white_reverse.svg" }; // Store buffer and metadata
+                    fields[key_pms] = ["187,A6192E", "5265,403A60", "WHITE,FFFFFF"];
+                    break;
+
+                case "American Flag (transparent) (reverse)":
+                    files[key_logo_file] = {buffer: "../assets/logos/american_reverse.svg" }; // Store buffer and metadata
+                    fields[key_pms] = ["187,A6192E", "5265,403A60"];
+                    break;
+
                 default:
                     console.log("Unknown logo type...exiting");
                     return;

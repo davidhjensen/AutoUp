@@ -113,6 +113,8 @@
                         <option value="Same Logo (as previous)" ${mockupNumber === 1 ? 'disabled' : ''}>Same Logo (as previous)</option>
                         <option value="American Flag">American Flag</option>
                         <option value="American Flag (transparent)">American Flag (transparent)</option>
+						<option value="American Flag (reverse)">American Flag (reverse)</option>
+                        <option value="American Flag (transparent) (reverse)">American Flag (transparent) (reverse)</option>
                     </select><br>
 
                     <div id="logoFields${mockupNumber}_${view}">
@@ -143,8 +145,10 @@
                 case "Same Logo (as previous)":
                     logoFields.innerHTML = ""; // Clear fields for "Same Logo (as previous)"
                     break;
-                case "American Flag":
-                case "American Flag (transparent)":
+					case "American Flag":
+					case "American Flag (transparent)":
+					case "American Flag (reverse)":
+                	case "American Flag (transparent) (reverse)":
                     logoFields.innerHTML = `
                         <label for="logoWidth${mockupNumber}_${view}">Width (inches):</label>
                         <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05" placeholder="Width (inches)" required><br>
