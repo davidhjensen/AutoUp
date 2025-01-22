@@ -9,8 +9,19 @@ app.http('techpackRequest', {
         const fields = {};
         const files = {};
 
+
+        const boundary = request.headers.get("content-type").split("boundary=")[1];
+        context.log("boundary read");
+
+        const input = (await request.text());
+        context.log("raw text read");
+
+        context.log(input.split(boundary));
+
+        /*
         const formData = await request.formData();
         formData.entries().forEach(element => {
+            context.log(element);
             if (fields[element[0]] != null) {
                 fields[element[0]].push(element[1]);
             } else {
@@ -20,7 +31,7 @@ app.http('techpackRequest', {
                 company_name = element[1];
             }
         });
-        context.log(fields);
+        */
         
         return { body: `Hello!` };
     }
