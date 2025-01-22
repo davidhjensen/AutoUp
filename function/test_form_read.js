@@ -155,12 +155,12 @@ async function techpackGenerator(fields, files, console, res) {
 
                 case "American Flag":
                     files[key_logo_file] = {buffer: "../assets/logos/american_white.svg" }; // Store buffer and metadata
-                    fields[key_pms] = ["PMS 187 C,A6192E", "PMS 5265 C,403A60", "WHITE,FFFFFF"];
+                    fields[key_pms] = ["187,A6192E", "5265,403A60", "WHITE,FFFFFF"];
                     break;
 
                 case "American Flag (transparent)":
                     files[key_logo_file] = {buffer: "../assets/logos/american.svg" }; // Store buffer and metadata
-                    fields[key_pms] = ["PMS 187 C,A6192E", "PMS 5265 C,403A60"];
+                    fields[key_pms] = ["187,A6192E", "5265,403A60"];
                     break;
 
                 default:
