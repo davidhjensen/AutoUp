@@ -1,38 +1,497 @@
-const { app } = require('@azure/functions');
+const { app, HttpResponse } = require('@azure/functions');
+const fs = require("fs");
+const PDFdoc = require("pdfkit");
+const { createCanvas, loadImage } = require('canvas');
+const SVGtoPDF = require('svg-to-pdfkit');
+const sharp = require('sharp');
+const { timeStamp, time } = require("console");
+
+app.setup({ enableHttpStream: true });
 
 app.http('techpackRequest', {
     methods: ['GET', 'POST'],
     authLevel: 'anonymous',
     handler: async (request, context) => {
         context.log(`Http function processed request for url "${request.url}"`);
+        context.log(__dirname)
 
-        const fields = {};
-        const files = {};
+        fields = {};
+        files = {};
+        let company_name;
 
-
-        const boundary = request.headers.get("content-type").split("boundary=")[1];
-        context.log("boundary read");
-
-        const input = (await request.text());
-        context.log("raw text read");
-
-        context.log(input.split(boundary));
-
-        /*
         const formData = await request.formData();
-        formData.entries().forEach(element => {
-            context.log(element);
-            if (fields[element[0]] != null) {
-                fields[element[0]].push(element[1]);
+        context.log("Form data read");
+
+        // save fields and files
+        for (const [key, value] of formData.entries()) {
+            context.log(typeof value);
+            if (typeof value === "object" && value.text) {
+                const fileData = await value.text(); // Wait for the promise to resolve
+                files[key] = { file: value, buffer: fileData }; // Store buffer and metadata
+            } else if (typeof fields[key]==="undefined") {
+                fields[key] = [value];
+                if (key==="companyName") {
+                    company_name = value;
+                }
             } else {
-                fields[element[0]] = [element[1]];
+                fields[key].push(value);
             }
-            if (element[0]=="companyName") {
-                company_name = element[1];
+        }
+        context.log("Fields and files parsed");
+
+        const res = new HttpResponse();
+        res.headers.set("Content-Type", "application/pdf");
+        res.headers.append("Content-Disposition", `attachment; filename="${company_name.toLowerCase().split(" ").join("_")}_techpack.pdf"`);
+
+        context.log("Generation begun...");
+        await techpackGenerator(fields, files, context);
+        context.log("Generation complete! Removing temp...");
+
+        const body = await fs.createReadStream(`${__dirname}/assets/temp/techpack.pdf`);
+
+        await fs.readdir(`${__dirname}/assets/temp`, (err, files) => {
+            for (let file of files) {
+                fs.unlink(`${__dirname}/assets/temp/${file}`, (err) => {
+                    if (err) throw err;
+                });
             }
         });
-        */
-        
-        return { body: `Hello!` };
+        context.log("Temp removed! Sending response...");
+
+        // Return the HTTP response directly
+        return {
+            status: 200,
+            headers: {
+                "Content-Type": "application/pdf",
+                "Content-Disposition": `attachment; filename="${company_name.toLowerCase().split(" ").join("_")}_techpack.pdf"`,
+            },
+            body: body,
+            isRaw: true,
+        };
     }
 });
+
+
+// add svg conversion function to PDFdoc
+PDFdoc.prototype.addSVG = function (svg, x, y, options) {
+    return SVGtoPDF(this, svg, x, y, options), this;
+};
+
+async function techpackGenerator(fields, files, console) {
+
+    // create and pipe the pdf
+    const techpack = new PDFdoc({ autoFirstPage: false });
+    techpack.pipe(fs.createWriteStream(`${__dirname}/assets/temp/techpack.pdf`));
+    console.log("PDF file initialized");
+
+    // generate each page in the techpack
+    for (let i = 0; i < parseInt(fields["numMockups"][0]); i++) {
+
+        // generate page size based on number of views
+        const key_view = `views${i + 1}[]`;
+        const num_views = fields[key_view].length;
+        const page_width = 600 + 1000 * num_views;
+        techpack.addPage({
+            size: [page_width, 1650]
+        })
+        techpack
+            .rect(0, 0, page_width, 1650)
+            .fill("#F5F5F5");
+        console.log("Page", i, "added");
+
+        // STUDSON logo
+        const studson_logo_path = `${__dirname}/assets/logos/studson_logo.svg`;
+        const studson_logo = fs.readFileSync(studson_logo_path, "utf8");
+        techpack.addSVG(studson_logo, 50, 50, {
+            width: 600,
+            height: 105,
+        });
+
+        // CUSTOM BRANDING
+        techpack
+            .font(`${__dirname}/assets/fonts/Cantarell-Bold.ttf`)
+            .fontSize("50")
+            .text("CUSTOM BRANDING", 50, 175, {
+                align: "center",
+                width: 600
+            });
+
+        // TOP INFO/OPTIONS
+        const key_model = `helmetModel${i + 1}`;
+        const key_class = `helmetClass${i + 1}`;
+        const key_color = `helmetColor${i + 1}`;
+        techpack
+            .font(`${__dirname}/assets/fonts/Cantarell-Regular.ttf`)
+            .fillColor("#000000")
+            .fontSize(30)
+            .text("DATE:\nCUSTOMER:\nHELMET STYLE:\nCOLOR:\nCERTIFICATIONS:", 675, 50)
+            .text(`${getDate()}\n${fields["companyName"]}\nSHK-1 ${fields[key_model]} ${fields[key_class]}\n${fields[key_color]}\nANSI Z89.1 - 2014 TYPE II`, 975, 50);
+
+        // Generate each view's mockup
+        let view_num = 0;
+
+        console.log(fields[key_view]);
+
+        for (let view of fields[key_view]) {
+            // Warp logo and composite on helmet
+            const helmet_path = generatePath(fields[key_model], fields[key_class], fields[key_color], view);
+            const key_logo_file = `logo${i + 1}_${view}`;
+            const logo_path = `${__dirname}/assets/temp/${view}_logo_${i}.png`;
+            const mockup_path = `${__dirname}/assets/temp/${view}_mockup_${i}.png`;
+            const key_width = `logoWidth${i + 1}_${view}`;
+            const key_shift = `logoShift${i + 1}_${view}`;
+            const key_pms = `pmsColor${i + 1}_${view}[]`;
+            const key_shortcut = `logoType${i + 1}_${view}`;
+
+            // update logo buffer, width, shift, and pms colors/code as necessary based on logo type
+            switch (fields[key_shortcut][0]) {
+                case "New Logo":
+                    break;
+
+                case "Same Logo (as previous)":
+                    files[key_logo_file] = files[`logo${i}_${view}`];
+                    fields[key_width] = fields[`logoWidth${i}_${view}`];
+                    fields[key_shift] = fields[`logoShift${i}_${view}`];
+                    fields[key_pms] = fields[`pmsColor${i}_${view}[]`]
+                    break;
+
+                case "American Flag":
+                    files[key_logo_file] = {buffer: `${__dirname}/assets/logos/american_white.svg` }; // Store buffer and metadata
+                    fields[key_pms] = ["187,A6192E", "5265,403A60", "WHITE,FFFFFF"];
+                    break;
+
+                case "American Flag (transparent)":
+                    files[key_logo_file] = {buffer: `${__dirname}/assets/logos/american.svg` }; // Store buffer and metadata
+                    fields[key_pms] = ["187,A6192E", "5265,403A60"];
+                    break;
+
+                case "American Flag (reverse)":
+                    files[key_logo_file] = {buffer: `${__dirname}/assets/logos/american_white_reverse.svg` }; // Store buffer and metadata
+                    fields[key_pms] = ["187,A6192E", "5265,403A60", "WHITE,FFFFFF"];
+                    break;
+
+                case "American Flag (transparent) (reverse)":
+                    files[key_logo_file] = {buffer: `${__dirname}/assets/logos/american_reverse.svg` }; // Store buffer and metadata
+                    fields[key_pms] = ["187,A6192E", "5265,403A60"];
+                    break;
+
+                default:
+                    console.log("Unknown logo type...exiting");
+                    return;
+            }
+
+            await generateMockup(fields[key_model], view, helmet_path, logo_path, mockup_path, files[key_logo_file], Number(fields[key_width]), Number(fields[key_shift]), console);
+
+            // place render
+            const render_height = ((["Front", "Back"].includes(view)) ? 1200 : 1050);
+            const render_placement_y = ((["Front", "Back"].includes(view)) ? 300 : 375);
+
+            techpack.image(mockup_path, 100 + view_num * 1000, render_placement_y, {
+                fit: [1400, render_height],
+                align: "center",
+            });
+            techpack
+                .font(`${__dirname}/assets/fonts/Cantarell-Bold.ttf`)
+                .fontSize(30)
+                .fillColor([0, 0, 0, 100])
+                .text(`${view}`, 300 + view_num * 1000, 1000, {
+                    width: 1000,
+                    align: "center"
+                });
+
+            // Place logo with dimensions and colors...
+            //      NOTE: Anchor is top right corner of the first square
+            //      and that the dimesion line for the logo is 350pt below the anchor
+
+            // Logo PMS colors
+            const x = view_num * 1000 + ((fields[key_view].length == 1) ? 100 : 300);
+            const y = 1150;
+            let pms_colors = fields[key_pms];
+
+            if (typeof pms_colors !== 'undefined') {
+                for (let index = 0; index < pms_colors.length; index++) {
+                    // square
+                    techpack
+                        .fillColor(`#${pms_colors[index].split(",")[1]}`)
+                        .rect(x, y + 75 * index, 50, 50)
+                        .fill();
+                    // text
+                    let color_name = pms_colors[index].split(",")[0];
+                    color_name = (isNaN(parseInt(color_name[0]))) ? `${color_name} C` : `PMS ${color_name} C`;
+                    techpack
+                        .font(`${__dirname}/assets/fonts/Cantarell-Regular.ttf`)
+                        .fontSize(30)
+                        .fillColor([0, 100, 0, 0])
+                        .text(`${color_name}`, x + 75, y + 25 + 75 * index, {
+                            baseline: "middle",
+                        });
+                }
+            }
+
+            // Dimensioned logo
+            techpack.image(logo_path, x + 400, y - 100, {
+                valign: "bottom",
+                fit: [400, 400]
+            });
+
+            // logo dimensions
+            techpack
+                .strokeColor([0, 100, 0, 0])
+                .lineWidth(2)
+                .moveTo(x + 400, y + 325)
+                .lineTo(x + 400, y + 350)
+                .lineTo(x + 800, y + 350)
+                .lineTo(x + 800, y + 325)
+                .stroke();
+            techpack
+                .font(`${__dirname}/assets/fonts/Cantarell-Regular.ttf`)
+                .fontSize(30)
+                .fillColor([0, 100, 0, 0])
+                .text(`${fields[key_width]} in`, x + 400, y + 375, {
+                    align: "center",
+                    width: 400
+                })
+
+            // increment view number
+            view_num = view_num + 1;
+        }
+
+        // Divider line
+        techpack
+            .lineWidth(2)
+            .strokeColor([0, 100, 0, 0])
+            .moveTo(100, 1050)
+            .lineTo(page_width - 100, 1050)
+            .stroke();
+        techpack
+            .font(`${__dirname}/assets/fonts/Cantarell-Regular.ttf`)
+            .fontSize(20)
+            .fillColor([0, 100, 0, 0])
+            .text("FINAL ARTWORK AT 100% ACTUAL SIZE", 100, 1050);
+
+        // Signature box
+        const signature_x = ((num_views == 1) ? 1000 : 1700);
+        const signature_y = ((num_views == 1) ? 1350 : 50);
+        techpack
+            .strokeColor([0, 0, 0, 100])
+            .lineWidth(1)
+            .rect(signature_x, signature_y, 500, 150)
+            .moveTo(signature_x + 20, signature_y + 130)
+            .lineTo(signature_x + 395, signature_y + 130)
+            .moveTo(signature_x + 405, signature_y + 130)
+            .lineTo(signature_x + 480, signature_y + 130)
+            .stroke();
+        techpack
+            .font(`${__dirname}/assets/fonts/Cantarell-Bold.ttf`)
+            .fontSize(10)
+            .fillColor([0, 0, 0, 100])
+            .text("SIGNATURE FOR APPROVAL", signature_x + 20, signature_y + 132, {
+                align: "center",
+                width: 295 - 20
+            })
+            .text("DATE", signature_x + 405, signature_y + 132, {
+                align: "center",
+                width: 380 - 305
+            })
+    }
+
+    techpack.end();
+
+
+    // return date string in format mm/dd/yyyy
+    function getDate() {
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        const yyyy = today.getFullYear();
+        return mm + '/' + dd + '/' + yyyy;
+    }
+
+    // generate the path to a given render provided helmet model, class, color, and view
+    // format for filename is <FB/SB>_<C/E>_<CamelCaseColor>_<F/L/R/B>
+    // NOTE: there are only class C renders for the back since they are not different from class E renders
+    function generatePath(helmet_model, helmet_class, helmet_color, helmet_view) {
+        
+        let folder = `${__dirname}/assets/renders`;
+        if (helmet_view == "Back") {
+            path = `${folder}/${(helmet_model == "Standard Brim") ? "SB" : "FB"}_C_${helmet_color}_${Array.from(helmet_view)[0]}.png`;
+        } else {
+            path = `${folder}/${(helmet_model == "Standard Brim") ? "SB" : "FB"}_${(helmet_class == "Vented Class C") ? "C" : "E"}_${helmet_color}_${Array.from(helmet_view)[0]}.png`;
+        }
+        return path;
+    }
+
+    // place a logo on a render
+    async function generateMockup(model, view, helmet_path, logo_path, mockup_path, logo_data, width, shift, console) {
+
+        const helmet = await loadImage(helmet_path);
+        const canvas = createCanvas(helmet.width, helmet.height);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(helmet, 0, 0);
+
+        let base_height;
+        let center_offset;
+        let scaler;
+
+        let logo;
+        let logoWidth;
+        let logoHeight;
+        let curveHeight;
+
+        switch (view) {
+            case "Front":
+                // logo location and scale
+                if (model == "Standard Brim") {
+                    base_height = 2870;
+                    center_offset = 3900;
+                } else {
+                    base_height = 2900;
+                    center_offset = 3900;
+                }
+                scaler = 492; // pixels per inch
+
+                // Convert SVG to PNG
+                await sharp((typeof logo_data.file==="undefined") ? logo_data.buffer : Buffer.from(logo_data.buffer))
+                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
+                    .png() // Convert to PNG format
+                    .toFile(logo_path); // Save to buffer
+                logo = await loadImage(logo_path);
+
+                // Simulate curved warping
+                logoWidth = logo.width;
+                logoHeight = logo.height;
+                curveHeight = -logo.height * .005; // concave down
+
+                for (let x = 0; x < logoWidth; x++) {
+                    yOffset = Math.sin((x / logoWidth) * Math.PI) * curveHeight;  // curve logo
+                    slice_x = Math.round(center_offset - logo.width / 2 + x);                   // center shifted back half the distnace of the logo written left to right
+                    slice_y = Math.round(base_height - yOffset - logo.height - shift * scaler); // base height shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    ctx.drawImage(
+                        logo,
+                        x, 0, 1, logoHeight,       // Source: slice 1px wide
+                        slice_x, slice_y, 1, logoHeight // Destination: warp along the curve
+                    );
+                }
+                break;
+
+            case "Left":
+                // logo location and scale
+                if (model == "Standard Brim") {
+                    center_y = 660;
+                    center_x = 1780;
+                    scaler = 300; // pixels per inch
+                } else {
+                    center_y = 780;
+                    center_x = 1730;
+                    scaler = 285; // pixels per inch
+                }
+
+                // Convert SVG to PNG
+                await sharp((typeof logo_data.file==="undefined") ? logo_data.buffer : Buffer.from(logo_data.buffer))
+                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
+                    .png() // Convert to PNG format
+                    .toFile(logo_path); // Save to buffer
+                logo = await loadImage(logo_path);
+
+                // Simulate curved warping and vertical compression
+                logoWidth = logo.width;
+                logoHeight = logo.height;
+                curveHeight = 20; // concave down
+                compression = .65;
+
+                for (let x = 0; x < logoWidth; x++) {
+                    yOffset = Math.sin((x / (logoWidth)) * Math.PI) * curveHeight;                // curve logo
+                    slice_x = Math.round(center_x - logo.width / 2 + x);                          // center shifted back half the distnace of the logo written left to right
+                    slice_y = Math.round(center_y - yOffset - logo.height / 2 - shift * scaler);    // center shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    ctx.drawImage(
+                        logo,
+                        x, 0, 1, logoHeight,       // Source: slice 1px wide
+                        slice_x, slice_y, 1, logoHeight * compression // Destination: warp along the curve
+                    );
+                }
+                break;
+
+            case "Right":
+                // logo location and scale
+                if (model == "Standard Brim") {
+                    center_y = 660;
+                    center_x = 1580;
+                    scaler = 300; // pixels per inch
+                } else {
+                    center_y = 790;
+                    center_x = 1560;
+                    scaler = 285; // pixels per inch
+                }
+
+                // Convert SVG to PNG
+                await sharp((typeof logo_data.file==="undefined") ? logo_data.buffer : Buffer.from(logo_data.buffer))
+                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
+                    .png() // Convert to PNG format
+                    .toFile(logo_path); // Save to buffer
+                logo = await loadImage(logo_path);
+
+                // Simulate curved warping and vertical compression
+                logoWidth = logo.width;
+                logoHeight = logo.height;
+                curveHeight = 20; // concave down
+                compression = .65;
+
+                for (let x = 0; x < logoWidth; x++) {
+                    yOffset = Math.sin((x / (logoWidth)) * Math.PI) * curveHeight;                // curve logo
+                    slice_x = Math.round(center_x - logo.width / 2 + x);                          // center shifted back half the distnace of the logo written left to right
+                    slice_y = Math.round(center_y - yOffset - logo.height / 2 - shift * scaler);    // center shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    ctx.drawImage(
+                        logo,
+                        x, 0, 1, logoHeight,       // Source: slice 1px wide
+                        slice_x, slice_y, 1, logoHeight * compression // Destination: warp along the curve
+                    );
+                }
+                break;
+
+            case "Back":
+                // logo location and scale
+                if (model == "Standard Brim") {
+                    center_y = 2250;
+                    center_x = 3920;
+                    scaler = 540; // pixels per inch
+                } else {
+                    center_y = 2290;
+                    center_x = 3890;
+                    scaler = 560; // pixels per inch
+                }
+                // Convert SVG to PNG
+                await sharp((typeof logo_data.file==="undefined") ? logo_data.buffer : Buffer.from(logo_data.buffer))
+                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
+                    .png() // Convert to PNG format
+                    .toFile(logo_path); // Save to buffer
+                logo = await loadImage(logo_path);
+
+                // Simulate curved warping
+                logoWidth = logo.width;
+                logoHeight = logo.height;
+                curveHeight = -logo.height * 0; // no curve
+
+                for (let x = 0; x < logoWidth; x++) {
+                    yOffset = Math.sin((x / logoWidth) * Math.PI) * curveHeight;  // curve logo
+                    slice_x = Math.round(center_x - logo.width / 2 + x);                   // center shifted back half the distnace of the logo written left to right
+                    slice_y = Math.round(center_y - yOffset - logo.height / 2 - shift * scaler); // center shifted (- offset = down | + offset = up) and written top to bottom (shift from base to top of logo)
+                    ctx.drawImage(
+                        logo,
+                        x, 0, 1, logoHeight,       // Source: slice 1px wide
+                        slice_x, slice_y, 1, logoHeight // Destination: warp along the curve
+                    );
+                }
+                break;
+
+            default:
+                console.log("Unknow view provided: note in {Front, Left, Right, Back}");
+        }
+
+        // Save the result, downscaling for smaller file size
+        const buffer = canvas.toBuffer('image/png');
+        await sharp(buffer)
+            .resize(2500, 2500, {fit: "inside"}) 
+            .png() 
+            .toFile(mockup_path);
+    }
+}
