@@ -109,6 +109,7 @@ async function techpackGenerator(fields, files, console, res) {
         // CUSTOM BRANDING
         techpack
             .font("../assets/fonts/Cantarell-Bold.ttf")
+            .fillColor("#000000")
             .fontSize("50")
             .text("CUSTOM BRANDING", 50, 175, {
                 align: "center",
