@@ -178,7 +178,7 @@ async function techpackGenerator(fields, files, console, res) {
                     console.log("Unknown logo type...exiting");
                     return;
             }
-            await generateMockup(fields[key_model], view, helmet_path, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), console);
+            await generateMockup(fields[key_model], view, helmet_path, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), files[key_logo_file].filename["filename"], console);
 
             // place render
             const render_height = ((["Front", "Back"].includes(view)) ? 1200 : 1050);
@@ -327,7 +327,7 @@ async function techpackGenerator(fields, files, console, res) {
     }
 
     // place a logo on a render
-    async function generateMockup(model, view, helmet_path, logo_path, mockup_path, logo_buffer, width, shift, console) {
+    async function generateMockup(model, view, helmet_path, logo_path, mockup_path, logo_buffer, width, shift, filename, console) {
 
         const helmet = await loadImage(helmet_path);
         const canvas = createCanvas(helmet.width, helmet.height);
@@ -355,12 +355,22 @@ async function techpackGenerator(fields, files, console, res) {
                 }
                 scaler = 492; // pixels per inch
 
-                // Convert SVG to PNG
-                await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
-                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
-                    .png() // Convert to PNG format
-                    .toFile(logo_path); // Save to specified file path
-                logo = await loadImage(logo_path);
+                let filetype = filename.split(".").pop();
+                if (filetype=="svg") {
+                    // Convert SVG to PNG
+                    await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
+                        .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
+                        .png() // Convert to PNG format
+                        .toFile(logo_path); // Save to specified file path
+                    logo = await loadImage(logo_path);
+                } else {
+                    // resize PNG
+                    await sharp(logo_buffer)
+                        .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
+                        .png() // Convert to PNG format
+                        .toFile(logo_path); // Save to specified file path
+                    logo = await loadImage(logo_path);
+                }
 
                 // Simulate curved warping
                 logoWidth = logo.width;
