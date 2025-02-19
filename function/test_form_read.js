@@ -227,10 +227,22 @@ async function techpackGenerator(fields, files, console, res) {
             }
 
             // Dimensioned logo
-            techpack.image(logo_path, x + 400, y - 100, {
-                valign: "bottom",
-                fit: [400, 400]
-            });
+            let filetype = files[key_logo_file]["filename"]["filename"].split(".").pop();
+            if (filetype=="svg") {
+                techpack.image(logo_path, x + 400, y - 100, {
+                    valign: "bottom",
+                    fit: [400, 400]
+                });
+            } else {
+                techpack
+                .font("../assets/fonts/Cantarell-Regular.ttf")
+                .fontSize(30)
+                .fillColor([0, 100, 0, 0])
+                .text(`VECTOR FILE NEEDED`, x + 400, y + 200, {
+                    align: "center",
+                    width: 400
+                })
+            }
 
             // logo dimensions
             techpack
