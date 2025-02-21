@@ -157,28 +157,32 @@ async function techpackGenerator(fields, files, console, res) {
                 case "American Flag":
                     files[key_logo_file] = {buffer: "../assets/logos/american_white.svg" }; // Store buffer and metadata
                     fields[key_pms] = ["187,A6192E", "5265,403A60", "WHITE,FFFFFF"];
+                    files[key_logo_file].filename = {"filename": "svg"};
                     break;
 
                 case "American Flag (transparent)":
                     files[key_logo_file] = {buffer: "../assets/logos/american.svg" }; // Store buffer and metadata
                     fields[key_pms] = ["187,A6192E", "5265,403A60"];
+                    files[key_logo_file].filename = {"filename": "svg"};
                     break;
 
                 case "American Flag (reverse)":
                     files[key_logo_file] = {buffer: "../assets/logos/american_white_reverse.svg" }; // Store buffer and metadata
                     fields[key_pms] = ["187,A6192E", "5265,403A60", "WHITE,FFFFFF"];
+                    files[key_logo_file].filename = {"filename": "svg"};
                     break;
 
                 case "American Flag (transparent) (reverse)":
                     files[key_logo_file] = {buffer: "../assets/logos/american_reverse.svg" }; // Store buffer and metadata
                     fields[key_pms] = ["187,A6192E", "5265,403A60"];
+                    files[key_logo_file].filename = {"filename": "svg"};
                     break;
 
                 default:
                     console.log("Unknown logo type...exiting");
                     return;
             }
-            await generateMockup(fields[key_model], view, helmet_path, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), console);
+            await generateMockup(fields[key_model], view, helmet_path, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), files[key_logo_file].filename["filename"], console);
 
             // place render
             const render_height = ((["Front", "Back"].includes(view)) ? 1200 : 1050);
@@ -227,10 +231,22 @@ async function techpackGenerator(fields, files, console, res) {
             }
 
             // Dimensioned logo
-            techpack.image(logo_path, x + 400, y - 100, {
-                valign: "bottom",
-                fit: [400, 400]
-            });
+            let filetype = files[key_logo_file]["filename"]["filename"].split(".").pop();
+            if (filetype=="svg") {
+                techpack.image(logo_path, x + 400, y - 100, {
+                    valign: "bottom",
+                    fit: [400, 400]
+                });
+            } else {
+                techpack
+                .font("../assets/fonts/Cantarell-Regular.ttf")
+                .fontSize(30)
+                .fillColor([0, 100, 0, 0])
+                .text(`VECTOR FILE NEEDED`, x + 400, y + 200, {
+                    align: "center",
+                    width: 400
+                })
+            }
 
             // logo dimensions
             techpack
@@ -327,7 +343,7 @@ async function techpackGenerator(fields, files, console, res) {
     }
 
     // place a logo on a render
-    async function generateMockup(model, view, helmet_path, logo_path, mockup_path, logo_buffer, width, shift, console) {
+    async function generateMockup(model, view, helmet_path, logo_path, mockup_path, logo_buffer, width, shift, filename, console) {
 
         const helmet = await loadImage(helmet_path);
         const canvas = createCanvas(helmet.width, helmet.height);
@@ -355,12 +371,22 @@ async function techpackGenerator(fields, files, console, res) {
                 }
                 scaler = 492; // pixels per inch
 
-                // Convert SVG to PNG
-                await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
-                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
-                    .png() // Convert to PNG format
-                    .toFile(logo_path); // Save to specified file path
-                logo = await loadImage(logo_path);
+                let filetype = filename.split(".").pop();
+                if (filetype=="svg") {
+                    // Convert SVG to PNG
+                    await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
+                        .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
+                        .png() // Convert to PNG format
+                        .toFile(logo_path); // Save to specified file path
+                    logo = await loadImage(logo_path);
+                } else {
+                    // resize PNG
+                    await sharp(logo_buffer)
+                        .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
+                        .png() // Convert to PNG format
+                        .toFile(logo_path); // Save to specified file path
+                    logo = await loadImage(logo_path);
+                }
 
                 // Simulate curved warping
                 logoWidth = logo.width;
