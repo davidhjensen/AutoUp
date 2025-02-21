@@ -157,21 +157,25 @@ async function techpackGenerator(fields, files, console, res) {
                 case "American Flag":
                     files[key_logo_file] = {buffer: "../assets/logos/american_white.svg" }; // Store buffer and metadata
                     fields[key_pms] = ["187,A6192E", "5265,403A60", "WHITE,FFFFFF"];
+                    files[key_logo_file].filename = {"filename": "svg"};
                     break;
 
                 case "American Flag (transparent)":
                     files[key_logo_file] = {buffer: "../assets/logos/american.svg" }; // Store buffer and metadata
                     fields[key_pms] = ["187,A6192E", "5265,403A60"];
+                    files[key_logo_file].filename = {"filename": "svg"};
                     break;
 
                 case "American Flag (reverse)":
                     files[key_logo_file] = {buffer: "../assets/logos/american_white_reverse.svg" }; // Store buffer and metadata
                     fields[key_pms] = ["187,A6192E", "5265,403A60", "WHITE,FFFFFF"];
+                    files[key_logo_file].filename = {"filename": "svg"};
                     break;
 
                 case "American Flag (transparent) (reverse)":
                     files[key_logo_file] = {buffer: "../assets/logos/american_reverse.svg" }; // Store buffer and metadata
                     fields[key_pms] = ["187,A6192E", "5265,403A60"];
+                    files[key_logo_file].filename = {"filename": "svg"};
                     break;
 
                 default:
