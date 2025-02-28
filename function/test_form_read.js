@@ -232,12 +232,17 @@ async function techpackGenerator(fields, files, console, res) {
 
             // Dimensioned logo
             let filetype = files[key_logo_file]["filename"]["filename"].split(".").pop();
+            let dim_width = 0;
             if (filetype=="svg") {
-                techpack.image(logo_path, x + 400, y - 100, {
+                const logo = await loadImage(logo_path);
+                const scale = Math.min(400 / logo.width, 300 / logo.height);
+                dim_width = logo.width*scale;
+                techpack.image(logo_path, x + 400, y, {
                     valign: "bottom",
-                    fit: [400, 400]
+                    fit: [400, 300]
                 });
             } else {
+                dim_width = 400;
                 techpack
                 .font("../assets/fonts/Cantarell-Regular.ttf")
                 .fontSize(30)
@@ -254,8 +259,8 @@ async function techpackGenerator(fields, files, console, res) {
                 .lineWidth(2)
                 .moveTo(x + 400, y + 325)
                 .lineTo(x + 400, y + 350)
-                .lineTo(x + 800, y + 350)
-                .lineTo(x + 800, y + 325)
+                .lineTo(x + 400 + dim_width, y + 350)
+                .lineTo(x + 400 + dim_width, y + 325)
                 .stroke();
             techpack
                 .font("../assets/fonts/Cantarell-Regular.ttf")
@@ -263,7 +268,7 @@ async function techpackGenerator(fields, files, console, res) {
                 .fillColor([0, 100, 0, 0])
                 .text(`${fields[key_width]} in`, x + 400, y + 375, {
                     align: "center",
-                    width: 400
+                    width: dim_width
                 })
 
             // increment view number
