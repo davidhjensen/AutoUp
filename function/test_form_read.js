@@ -7,7 +7,6 @@ const SVGtoPDF = require('svg-to-pdfkit');
 const sharp = require('sharp');
 const { timeStamp, time } = require("console");
 const blobStream = require('blob-stream');
-const { readLongLong } = require('pdfkit/js/data');
 
 const server = http.createServer((req, res) => {
     if (req.method === 'POST') {
@@ -238,7 +237,7 @@ async function techpackGenerator(fields, files, console, res) {
                 const logo = await loadImage(logo_path);
                 const scale = Math.min(400 / logo.width, 300 / logo.height);
                 dim_width = logo.width*scale;
-                techpack.image(logo, x + 400, y - 100, {
+                techpack.image(logo_path, x + 400, y, {
                     valign: "bottom",
                     fit: [400, 300]
                 });
@@ -269,7 +268,7 @@ async function techpackGenerator(fields, files, console, res) {
                 .fillColor([0, 100, 0, 0])
                 .text(`${fields[key_width]} in`, x + 400, y + 375, {
                     align: "center",
-                    width: 400
+                    width: dim_width
                 })
 
             // increment view number
