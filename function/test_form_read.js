@@ -322,8 +322,9 @@ async function techpackGenerator(fields, files, console, res) {
                     align: "center",
                     required: true,
                     backgroundColor: "#FFFFFF",
-                    format: "m/d/y",
+                    format: "mm/dd/yy",
                 })
+                .form
     }
 
     await fs.readdir("../assets/temp", (err, files) => {
