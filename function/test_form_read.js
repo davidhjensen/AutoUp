@@ -207,7 +207,7 @@ async function techpackGenerator(fields, files, console, res) {
 
             // Logo PMS colors
             const x = view_num * 1000 + ((fields[key_view].length == 1) ? 100 : 300);
-            const y = 1150;
+            const y = 1100;
             let pms_colors = fields[key_pms];
 
             if (typeof pms_colors !== 'undefined') {
@@ -296,8 +296,8 @@ async function techpackGenerator(fields, files, console, res) {
             .lineWidth(1)
             .rect(signature_x, signature_y, 500, 150)
             .moveTo(signature_x + 20, signature_y + 130)
-            .lineTo(signature_x + 395, signature_y + 130)
-            .moveTo(signature_x + 405, signature_y + 130)
+            .lineTo(signature_x + 345, signature_y + 130)
+            .moveTo(signature_x + 355, signature_y + 130)
             .lineTo(signature_x + 480, signature_y + 130)
             .stroke();
         techpack
@@ -306,12 +306,24 @@ async function techpackGenerator(fields, files, console, res) {
             .fillColor([0, 0, 0, 100])
             .text("SIGNATURE FOR APPROVAL", signature_x + 20, signature_y + 132, {
                 align: "center",
-                width: 295 - 20
+                width: 345 - 20
             })
-            .text("DATE", signature_x + 405, signature_y + 132, {
+            .text("DATE", signature_x + 355, signature_y + 132, {
                 align: "center",
-                width: 380 - 305
+                width: 480 - 355
             })
+        techpack.initForm()
+                .formText("Approval Signature", signature_x + 20, signature_y + 68, 345 - 20, 60, {
+                    align: "center",
+                    required: true,
+                    backgroundColor: "#FFFFFF",
+                })
+                .formText("Date", signature_x + 355, signature_y + 68, 480 - 355, 60, {
+                    align: "center",
+                    required: true,
+                    backgroundColor: "#FFFFFF",
+                    format: "m/d/y",
+                })
     }
 
     await fs.readdir("../assets/temp", (err, files) => {
