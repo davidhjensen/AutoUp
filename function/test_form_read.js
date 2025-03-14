@@ -83,6 +83,9 @@ async function techpackGenerator(fields, files, console, res) {
     // pipe to response
     techpack.pipe(res);
 
+    // enable form
+    techpack.initForm();
+
     // generate each page in the techpack
     for (let i = 0; i < parseInt(fields["numMockups"][0]); i++) {
 
@@ -312,8 +315,7 @@ async function techpackGenerator(fields, files, console, res) {
                 align: "center",
                 width: 480 - 355
             })
-        techpack.initForm()
-                .formText(`Approval Signature ${i}`, signature_x + 20, signature_y + 68, 345 - 20, 60, {
+        techpack.formText(`Approval Signature ${i}`, signature_x + 20, signature_y + 68, 345 - 20, 60, {
                     align: "center",
                     required: true,
                     backgroundColor: "#FFFFFF",
@@ -324,9 +326,9 @@ async function techpackGenerator(fields, files, console, res) {
                     backgroundColor: "#FFFFFF",
                     format: "mm/dd/yy",
                 })
-                .endAcroForm();
+                
     }
-    /*
+    
     await fs.readdir("../assets/temp", (err, files) => {
         for (let file of files) {
             fs.unlink(`../assets/temp/${file}`, (err) => {
@@ -334,7 +336,7 @@ async function techpackGenerator(fields, files, console, res) {
             });
         }
     });
-    */
+    
     techpack.end();
 
     // return date string in format mm/dd/yyyy
