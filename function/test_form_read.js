@@ -313,20 +313,20 @@ async function techpackGenerator(fields, files, console, res) {
                 width: 480 - 355
             })
         techpack.initForm()
-                .formText("Approval Signature", signature_x + 20, signature_y + 68, 345 - 20, 60, {
+                .formText(`Approval Signature ${i}`, signature_x + 20, signature_y + 68, 345 - 20, 60, {
                     align: "center",
                     required: true,
                     backgroundColor: "#FFFFFF",
                 })
-                .formText("Date", signature_x + 355, signature_y + 68, 480 - 355, 60, {
+                .formText(`Date ${i}`, signature_x + 355, signature_y + 68, 480 - 355, 60, {
                     align: "center",
                     required: true,
                     backgroundColor: "#FFFFFF",
                     format: "mm/dd/yy",
                 })
-                .form
+                .endAcroForm();
     }
-
+    /*
     await fs.readdir("../assets/temp", (err, files) => {
         for (let file of files) {
             fs.unlink(`../assets/temp/${file}`, (err) => {
@@ -334,7 +334,7 @@ async function techpackGenerator(fields, files, console, res) {
             });
         }
     });
-
+    */
     techpack.end();
 
     // return date string in format mm/dd/yyyy
