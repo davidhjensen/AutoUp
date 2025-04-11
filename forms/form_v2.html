@@ -17,11 +17,14 @@
 <body>
     <h1>Product Mockup Form</h1>
     <form action="http://localhost:3000" method="POST" enctype="multipart/form-data">
-        <label for="companyName">Company Name (required):</label><br>
+        <label for="companyName">Company Name:</label><br>
         <input type="text" id="companyName" name="companyName" required><br><br>
+		
+		<label for="verTechpack">Techpack Version:</label><br>
+        <input type="number" id="verTechpack" name="verTechpack" min="1" step="1" value="1" required><br><br>
 
         <label for="numMockups">Number of Mockups:</label><br>
-        <input type="number" id="numMockups" name="numMockups" min="1" step="1"><br><br>
+        <input type="number" id="numMockups" name="numMockups" min="1" step="1" value="1" required><br><br>
 
         <button type="button" id="generateForms">Generate Mockup Forms</button>
 
@@ -79,7 +82,9 @@
                         <option value="Black">Black</option>
                         <option value="RoyalBlue">RoyalBlue</option>
                         <option value="Grey">Grey</option>
-                        <option value="CarbonFiber">CarbonFiber</option>                        
+                        <option value="CarbonFiber">CarbonFiber</option>    
+                        <option value="FishelYellow_109">FishelYellow_109</option>    
+                        <option value="FishelYellow_123">FishelYellow_123</option> 
                     </select><br><br>
 
                     <label for="views${i}">Views (select multiple):</label><br>
@@ -160,7 +165,7 @@
                 default: // "New Logo"
                     logoFields.innerHTML = `
                         <label for="logo${mockupNumber}_${view}">Logo:</label>
-                        <input type="file" name="logo${mockupNumber}_${view}" accept=".svg,.png" required><br>
+                        <input type="file" name="logo${mockupNumber}_${view}" accept=".svg,.png,.jpg" required><br>
 
                         <label for="logoWidth${mockupNumber}_${view}">Width (inches):</label>
                         <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05" placeholder="Width (inches)" required><br>
@@ -175,6 +180,25 @@
 
         const pmsColors = {
 		"White": "FFFFFF",
+		"7735": "36573B",
+		"7719": "006D68",
+		"7408": "F6BE00",
+		"7406": "F1C400",
+		"7619": "DB4437",
+		"7724": "0F9D58",
+		"7683": "426DA9",
+		"Bright Red": "F93822",
+		"7481": "00B74F",
+		"7743": "44693D",
+		"7621": "AB2328",
+		"2174": "007DBA",
+		"7686": "1D4F91",
+		"4158": "387f97",
+		"7484": "00573F",
+		"2301": "8fad15",
+		"7691": "006298",
+		"7720": "00635B",
+		"7501": "D9C89E",
 		"6018 CP": "e18739",
 		"444 CP": "6b7b7a",
 		"7488": "78D64B",
@@ -489,7 +513,7 @@
 		"2765": "2b0c56",
 		"2706": "d1cedd",
 		"2716": "a5a0d6",
-		"2726": "6656bc",
+		"2726": "0668E1",
 		"2736": "4930ad",
 		"2746": "3f2893",
 		"2756": "332875",
@@ -963,7 +987,7 @@
 		"571": "7fc6b2",
 		"572": "aadbc6",
 		"573": "bce2ce",
-		"574": "cce5d6",
+		"574": "4E5B31",
 		"575": "495928",
 		"576": "547730",
 		"577": "608e3a",
@@ -1154,7 +1178,7 @@
 
         function addPmsColor(mockupNumber, view) {
             const container = document.getElementById(`pmsColorsContainer${mockupNumber}_${view}`);
-            if (container.children.length >= 6) return; // Limit to 6 colors
+            if (container.children.length >= 7) return; // Limit to 7 colors
 
             const newEntry = document.createElement('div');
             newEntry.innerHTML = `

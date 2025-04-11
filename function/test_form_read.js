@@ -49,7 +49,7 @@ const server = http.createServer((req, res) => {
             console.log('Form parsing compvared');
             console.log(fields);
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${company_name.toLowerCase().split(" ").join("_")}_techpack.pdf"`);
+            res.setHeader('Content-Disposition', `attachment; filename="${company_name.toLowerCase().split(" ").join("_")}_techpack_v${fields["verTechpack"]}.pdf"`);
             techpackGenerator(fields, files, console, res);
 
         });
@@ -104,7 +104,7 @@ async function techpackGenerator(fields, files, console, res) {
         // STUDSON logo
         const studson_logo_path = '../assets/logos/studson_logo.svg';
         const studson_logo = fs.readFileSync(studson_logo_path, "utf8");
-        techpack.addSVG(studson_logo, 50, 50, {
+        techpack.addSVG(studson_logo, 50, 75, {
             width: 600,
             height: 105,
         });
@@ -114,7 +114,7 @@ async function techpackGenerator(fields, files, console, res) {
             .font("../assets/fonts/Cantarell-Bold.ttf")
             .fillColor("#000000")
             .fontSize("50")
-            .text("CUSTOM BRANDING", 50, 175, {
+            .text("CUSTOM BRANDING", 50, 200, {
                 align: "center",
                 width: 600
             });
@@ -127,8 +127,8 @@ async function techpackGenerator(fields, files, console, res) {
             .font("../assets/fonts/Cantarell-Regular.ttf")
             .fillColor("#000000")
             .fontSize(30)
-            .text("DATE:\nCUSTOMER:\nHELMET STYLE:\nCOLOR:\nCERTIFICATIONS:", 675, 50)
-            .text(`${getDate()}\n${fields["companyName"]}\nSHK-1 ${fields[key_model]} ${fields[key_class]}\n${fields[key_color]}\nANSI Z89.1 - 2014 TYPE II`, 975, 50);
+            .text("DATE:\nCUSTOMER:\nHELMET STYLE:\nCOLOR:\nCERTIFICATIONS:\nVERSION", 675, 50)
+            .text(`${getDate()}\n${fields["companyName"]}\nSHK-1 ${fields[key_model]} ${fields[key_class]}\n${fields[key_color]}\nANSI Z89.1 - 2014 TYPE II\n${getVersion(fields["verTechpack"][0])}`, 975, 50);
 
         // Generate each view's mockup
         let view_num = 0;
@@ -348,6 +348,15 @@ async function techpackGenerator(fields, files, console, res) {
         return mm + '/' + dd + '/' + yyyy;
     }
 
+    // return version string in format TPYYYY-MMDD-#
+    function getVersion(version) {
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        const yyyy = today.getFullYear();
+        return 'TP' + yyyy + '-' + mm + dd + '-' + version;
+    }
+
     // generate the path to a given render provided helmet model, class, color, and view
     // format for filename is <FB/SB>_<C/E>_<CamelCaseColor>_<F/L/R/B>
     // NOTE: there are only class C renders for the back since they are not different from class E renders
@@ -412,7 +421,7 @@ async function techpackGenerator(fields, files, console, res) {
                 logoWidth = logo.width;
                 logoHeight = logo.height;
                 curveHeight = -logo.height * .005; // concave down
-
+                
                 for (let x = 0; x < logoWidth; x++) {
                     yOffset = Math.sin((x / logoWidth) * Math.PI) * curveHeight;  // curve logo
                     slice_x = Math.round(center_offset - logo.width / 2 + x);                   // center shifted back half the distnace of the logo written left to right
@@ -449,7 +458,7 @@ async function techpackGenerator(fields, files, console, res) {
                 logoHeight = logo.height;
                 curveHeight = 20; // concave down
                 compression = .65;
-
+                
                 for (let x = 0; x < logoWidth; x++) {
                     yOffset = Math.sin((x / (logoWidth)) * Math.PI) * curveHeight;                // curve logo
                     slice_x = Math.round(center_x - logo.width / 2 + x);                          // center shifted back half the distnace of the logo written left to right
