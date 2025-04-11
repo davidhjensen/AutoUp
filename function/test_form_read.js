@@ -49,7 +49,7 @@ const server = http.createServer((req, res) => {
             console.log('Form parsing compvared');
             console.log(fields);
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${company_name.toLowerCase().split(" ").join("_")}_techpack.pdf"`);
+            res.setHeader('Content-Disposition', `attachment; filename="${company_name.toLowerCase().split(" ").join("_")}_techpack_v${fields["verTechpack"]}.pdf"`);
             techpackGenerator(fields, files, console, res);
 
         });
@@ -104,7 +104,7 @@ async function techpackGenerator(fields, files, console, res) {
         // STUDSON logo
         const studson_logo_path = '../assets/logos/studson_logo.svg';
         const studson_logo = fs.readFileSync(studson_logo_path, "utf8");
-        techpack.addSVG(studson_logo, 50, 50, {
+        techpack.addSVG(studson_logo, 50, 75, {
             width: 600,
             height: 105,
         });
@@ -114,7 +114,7 @@ async function techpackGenerator(fields, files, console, res) {
             .font("../assets/fonts/Cantarell-Bold.ttf")
             .fillColor("#000000")
             .fontSize("50")
-            .text("CUSTOM BRANDING", 50, 175, {
+            .text("CUSTOM BRANDING", 50, 200, {
                 align: "center",
                 width: 600
             });
