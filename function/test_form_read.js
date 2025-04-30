@@ -123,6 +123,8 @@ async function techpackGenerator(fields, files, console, res) {
         const key_model = `helmetModel${i + 1}`;
         const key_class = `helmetClass${i + 1}`;
         const key_color = `helmetColor${i + 1}`;
+        const key_sticker = `helmetSticker${i + 1}`;
+
         techpack
             .font("../assets/fonts/Cantarell-Regular.ttf")
             .fillColor("#000000")
@@ -132,11 +134,12 @@ async function techpackGenerator(fields, files, console, res) {
 
         // Generate each view's mockup
         let view_num = 0;
+        let sticker = fields[key_sticker][0];
 
 
         for (let view of fields[key_view]) {
             // Warp logo and composite on helmet
-            const helmet_path = generatePath(fields[key_model], fields[key_class], fields[key_color], view);
+            const paths = generatePath(fields[key_model], fields[key_class], fields[key_color], view, sticker);
             const key_logo_file = `logo${i + 1}_${view}`;
             const logo_path = `../assets/temp/${view}_logo_${i}.png`;
             const mockup_path = `../assets/temp/${view}_mockup_${i}.png`;
@@ -185,7 +188,7 @@ async function techpackGenerator(fields, files, console, res) {
                     console.log("Unknown logo type...exiting");
                     return;
             }
-            await generateMockup(fields[key_model], view, helmet_path, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), files[key_logo_file].filename["filename"], console);
+            await generateMockup(fields[key_model], view, paths, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), files[key_logo_file].filename["filename"], sticker, console);
 
             // place render
             const render_height = ((["Front", "Back"].includes(view)) ? 1200 : 1050);
@@ -360,7 +363,7 @@ async function techpackGenerator(fields, files, console, res) {
     // generate the path to a given render provided helmet model, class, color, and view
     // format for filename is <FB/SB>_<C/E>_<CamelCaseColor>_<F/L/R/B>
     // NOTE: there are only class C renders for the back since they are not different from class E renders
-    function generatePath(helmet_model, helmet_class, helmet_color, helmet_view) {
+    function generatePath(helmet_model, helmet_class, helmet_color, helmet_view, sticker) {
         
         let folder = "../assets/renders";
         if (helmet_view == "Back") {
@@ -368,16 +371,34 @@ async function techpackGenerator(fields, files, console, res) {
         } else {
             path = `${folder}/${(helmet_model == "Standard Brim") ? "SB" : "FB"}_${(helmet_class == "Vented Class C") ? "C" : "E"}_${helmet_color}_${Array.from(helmet_view)[0]}.png`;
         }
-        return path;
+        sticker_path = `${folder}/Reflective_${sticker}_${(helmet_model == "Standard Brim") ? "SB" : "FB"}_${Array.from(helmet_view)[0]}.png`;
+
+        return {
+            helmet: path,
+            sticker: sticker_path,
+        };
     }
 
     // place a logo on a render
-    async function generateMockup(model, view, helmet_path, logo_path, mockup_path, logo_buffer, width, shift, filename, console) {
+    async function generateMockup(model, view, paths, logo_path, mockup_path, logo_buffer, width, shift, filename, sticker, console) {
 
-        const helmet = await loadImage(helmet_path);
+        // add helmet render
+        const helmet = await loadImage(paths.helmet);
         const canvas = createCanvas(helmet.width, helmet.height);
         const ctx = canvas.getContext('2d');
         ctx.drawImage(helmet, 0, 0);
+
+        // add stickers as needed
+        switch (sticker) {
+            case "None":
+                break;
+            
+            case "Grey":
+            case "Flash":
+                const sticker = await loadImage(paths.sticker);
+                ctx.drawImage(sticker, 0, 0);
+                break;
+        }
 
         let base_height;
         let center_offset;
@@ -544,7 +565,7 @@ async function techpackGenerator(fields, files, console, res) {
                 break;
 
             default:
-                console.log("Unknow view provided: note in {Front, Left, Right, Back}");
+                console.log("Unknow view provided: not in {Front, Left, Right, Back}");
         }
 
         // Save the result, downscaling for smaller file size
