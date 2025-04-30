@@ -87,6 +87,13 @@
                         <option value="FishelYellow_123">FishelYellow_123</option> 
                     </select><br><br>
 
+					<label for="helmetSticker${i}">Stickers:</label><br>
+                    <select id="helmetSticker${i}" name="helmetSticker${i}" required>
+                        <option value="None" selected="selected">None</option>
+                        <option value="Grey">Grey</option>
+                        <option value="Flash">Flash</option>
+                    </select><br><br>
+
                     <label for="views${i}">Views (select multiple):</label><br>
                     <select id="views${i}" name="views${i}[]" multiple required onchange="generateLogoAndPmsFields(${i})">
                         <option value="Front">Front</option>
@@ -180,6 +187,14 @@
 
         const pmsColors = {
 		"White": "FFFFFF",
+		"3517 CP": "c51d25",
+		"7540": "4B4F54",
+		"2290": "bcf100",
+		"2169": "81b0d2",
+		"7462": "00558C",
+		"288 U": "3d5588",
+		"7572": "B67233",
+		"9142": "EDE7CC",
 		"7735": "36573B",
 		"7719": "006D68",
 		"7408": "F6BE00",
