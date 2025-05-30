@@ -127,6 +127,7 @@
                         <option value="American Flag (transparent)">American Flag (transparent)</option>
 						<option value="American Flag (reverse)">American Flag (reverse)</option>
                         <option value="American Flag (transparent) (reverse)">American Flag (transparent) (reverse)</option>
+                        <option value="Blank">Blank</option>
                     </select><br>
 
                     <div id="logoFields${mockupNumber}_${view}">
@@ -155,6 +156,7 @@
 			pmsColorsContainer.innerHTML = ""; // Clear PMS fields
             switch (select.value) {
                 case "Same Logo (as previous)":
+				case "Blank":
                     logoFields.innerHTML = ""; // Clear fields for "Same Logo (as previous)"
                     break;
 					case "American Flag":
@@ -187,6 +189,21 @@
 
         const pmsColors = {
 		"White": "FFFFFF",
+		"7576": "DB864E",
+		"7635": "C63663",
+		"166 U": "e16740",
+		"7699": "34657F",
+		"7578": "DC6B2F",
+		"7546":"253746",
+		"7689": "298FC2",
+		"7483": "275D38",
+		"Process Magenta": "d6006e",
+		"2271": "00B934",
+		"3537": "004820",
+		"7405": "F2CD00",
+		"7599": "B33D26",
+		"7563": "D69A2D",
+		"7407": "CBA052",
 		"3517 CP": "c51d25",
 		"7540": "4B4F54",
 		"2290": "bcf100",
@@ -535,7 +552,7 @@
 		"2766": "2b265b",
 		"2707": "bfd1e5",
 		"2717": "a5bae0",
-		"2727": "5e68c4",
+		"2727": "307FE2",
 		"Blue 072": "10069F",
 		"2747": "1c146b",
 		"2757": "141654",
@@ -556,7 +573,7 @@
 		"282": "002654",
 		"283": "9bc4e2",
 		"284": "75aadb",
-		"285": "3a75c4",
+		"285": "0072CE",
 		"286": "0038a8",
 		"287": "003893",
 		"288": "00337f",

@@ -1,7 +1,7 @@
 const Busboy = require('busboy');
 const http = require('http');
 const fs = require("fs");
-const PDFdoc = require("pdfkit");
+const PDFdoc = require("pdfkit"); //pdflib
 const { createCanvas, loadImage } = require('canvas');
 const SVGtoPDF = require('svg-to-pdfkit');
 const sharp = require('sharp');
@@ -139,7 +139,6 @@ async function techpackGenerator(fields, files, console, res) {
 
         for (let view of fields[key_view]) {
             // Warp logo and composite on helmet
-            const paths = generatePath(fields[key_model], fields[key_class], fields[key_color], view, sticker);
             const key_logo_file = `logo${i + 1}_${view}`;
             const logo_path = `../assets/temp/${view}_logo_${i}.png`;
             const mockup_path = `../assets/temp/${view}_mockup_${i}.png`;
@@ -148,9 +147,22 @@ async function techpackGenerator(fields, files, console, res) {
             const key_pms = `pmsColor${i + 1}_${view}[]`;
             const key_shortcut = `logoType${i + 1}_${view}`;
 
+            // bool to control whether a logo is placed or not
+            let blank = false;
+
             // update logo buffer, width, shift, and pms colors/code as necessary based on logo type
             switch (fields[key_shortcut][0]) {
                 case "New Logo":
+                    break;
+                
+                case "Blank":
+                    blank = true;
+                    files[key_logo_file] = "NULL";
+                    fields[key_width] = "NULL";
+                    fields[key_shift] = "NULL";
+                    fields[key_pms] = "NULL";
+                    files[key_logo_file] = {filename: {filename: "NULL"}};
+                    files[key_logo_file].filename["filename"] = "NULL";
                     break;
 
                 case "Same Logo (as previous)":
@@ -188,7 +200,9 @@ async function techpackGenerator(fields, files, console, res) {
                     console.log("Unknown logo type...exiting");
                     return;
             }
-            await generateMockup(fields[key_model], view, paths, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), files[key_logo_file].filename["filename"], sticker, console);
+
+            const paths = generatePath(fields[key_model], fields[key_class], fields[key_color], view, sticker, blank);
+            await generateMockup(fields[key_model], view, paths, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), files[key_logo_file].filename["filename"], sticker, blank, console);
 
             // place render
             const render_height = ((["Front", "Back"].includes(view)) ? 1200 : 1050);
@@ -216,7 +230,7 @@ async function techpackGenerator(fields, files, console, res) {
             const y = 1100;
             let pms_colors = fields[key_pms];
 
-            if (typeof pms_colors !== 'undefined') {
+            if (typeof pms_colors !== 'undefined' & !blank) {
                 for (let index = 0; index < pms_colors.length; index++) {
                     // square
                     techpack
@@ -225,7 +239,7 @@ async function techpackGenerator(fields, files, console, res) {
                         .fill();
                     // text
                     let color_name = pms_colors[index].split(",")[0];
-                    color_name = (isNaN(parseInt(color_name[0]))) ? `${color_name} C` : `PMS ${color_name} C`;
+                    color_name = (isNaN(parseInt(color_name[0]))) ? `${color_name} C` : `PMS ${color_name}`;
                     techpack
                         .font("../assets/fonts/Cantarell-Regular.ttf")
                         .fontSize(30)
@@ -239,7 +253,7 @@ async function techpackGenerator(fields, files, console, res) {
             // Dimensioned logo
             let filetype = files[key_logo_file]["filename"]["filename"].split(".").pop();
             let dim_width = 0;
-            if (filetype=="svg") {
+            if (filetype=="svg" & !blank) {
                 const logo = await loadImage(logo_path);
                 const scale = Math.min(400 / logo.width, 300 / logo.height);
                 dim_width = logo.width*scale;
@@ -247,7 +261,7 @@ async function techpackGenerator(fields, files, console, res) {
                     valign: "bottom",
                     fit: [400, 300]
                 });
-            } else {
+            } else if (!blank) {
                 dim_width = 400;
                 techpack
                 .font("../assets/fonts/Cantarell-Regular.ttf")
@@ -260,22 +274,24 @@ async function techpackGenerator(fields, files, console, res) {
             }
 
             // logo dimensions
-            techpack
-                .strokeColor([0, 100, 0, 0])
-                .lineWidth(2)
-                .moveTo(x + 400, y + 325)
-                .lineTo(x + 400, y + 350)
-                .lineTo(x + 400 + dim_width, y + 350)
-                .lineTo(x + 400 + dim_width, y + 325)
-                .stroke();
-            techpack
-                .font("../assets/fonts/Cantarell-Regular.ttf")
-                .fontSize(30)
-                .fillColor([0, 100, 0, 0])
-                .text(`${fields[key_width]} in`, x + 400, y + 375, {
-                    align: "center",
-                    width: dim_width
-                })
+            if (!blank) {
+                techpack
+                    .strokeColor([0, 100, 0, 0])
+                    .lineWidth(2)
+                    .moveTo(x + 400, y + 325)
+                    .lineTo(x + 400, y + 350)
+                    .lineTo(x + 400 + dim_width, y + 350)
+                    .lineTo(x + 400 + dim_width, y + 325)
+                    .stroke();
+                techpack
+                    .font("../assets/fonts/Cantarell-Regular.ttf")
+                    .fontSize(30)
+                    .fillColor([0, 100, 0, 0])
+                    .text(`${fields[key_width]} in`, x + 400, y + 375, {
+                        align: "center",
+                        width: dim_width
+                    })
+                }
 
             // increment view number
             view_num = view_num + 1;
@@ -363,7 +379,7 @@ async function techpackGenerator(fields, files, console, res) {
     // generate the path to a given render provided helmet model, class, color, and view
     // format for filename is <FB/SB>_<C/E>_<CamelCaseColor>_<F/L/R/B>
     // NOTE: there are only class C renders for the back since they are not different from class E renders
-    function generatePath(helmet_model, helmet_class, helmet_color, helmet_view, sticker) {
+    function generatePath(helmet_model, helmet_class, helmet_color, helmet_view, sticker, blank) {
         
         let folder = "../assets/renders";
         if (helmet_view == "Back") {
@@ -371,7 +387,7 @@ async function techpackGenerator(fields, files, console, res) {
         } else {
             path = `${folder}/${(helmet_model == "Standard Brim") ? "SB" : "FB"}_${(helmet_class == "Vented Class C") ? "C" : "E"}_${helmet_color}_${Array.from(helmet_view)[0]}.png`;
         }
-        sticker_path = `${folder}/Reflective_${sticker}_${(helmet_model == "Standard Brim") ? "SB" : "FB"}_${Array.from(helmet_view)[0]}.png`;
+        sticker_path = `${folder}/Reflective_${sticker}_${(helmet_model == "Standard Brim") ? "SB" : "FB"}_${Array.from(helmet_view)[0]}${(blank) ? "_Blank" : ""}.png`;
 
         return {
             helmet: path,
@@ -380,7 +396,7 @@ async function techpackGenerator(fields, files, console, res) {
     }
 
     // place a logo on a render
-    async function generateMockup(model, view, paths, logo_path, mockup_path, logo_buffer, width, shift, filename, sticker, console) {
+    async function generateMockup(model, view, paths, logo_path, mockup_path, logo_buffer, width, shift, filename, sticker, blank, console) {
 
         // add helmet render
         const helmet = await loadImage(paths.helmet);
@@ -408,6 +424,17 @@ async function techpackGenerator(fields, files, console, res) {
         let logoWidth;
         let logoHeight;
         let curveHeight;
+
+        // skip logo if helmet should be blank
+        if (blank) {
+            // Save the result, downscaling for smaller file size
+            const buffer = canvas.toBuffer('image/png');
+            await sharp(buffer)
+                .resize(2500, 2500, {fit: "inside"}) 
+                .png() 
+                .toFile(mockup_path);
+            return;
+        }
 
         switch (view) {
             case "Front":
