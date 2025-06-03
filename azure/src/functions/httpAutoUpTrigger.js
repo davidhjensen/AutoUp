@@ -1,16 +1,18 @@
 const { app } = require('@azure/functions');
 const PDFdoc = require("pdfkit");
-const blobStream = require('blob-stream');
 const fs = require("fs");
 const { createCanvas, loadImage } = require('canvas');
 const SVGtoPDF = require('svg-to-pdfkit');
 const sharp = require('sharp');
+const os = require('os');
+const path = require('path');
 
 app.http('httpTriggerStreamResponse', {
     methods: ['POST'],
     authLevel: 'anonymous',
     handler: async (request, context) => {
 
+        /*
         // Remove temp files
         await fs.readdir("./assets/temp", (err, files) => {
             for (let file of files) {
@@ -19,6 +21,7 @@ app.http('httpTriggerStreamResponse', {
                 });
             }
         });
+        */
 
         // Parse incoming data
         const data = Buffer.from(await request.arrayBuffer());
@@ -28,7 +31,7 @@ app.http('httpTriggerStreamResponse', {
         context.log(parsed.files);
 
         // Generate techpack
-        const filename = "./assets/temp/test.pdf";
+        const filename = path.join(os.tmpdir(), 'techpack.pdf');
         const writeStream = fs.createWriteStream(filename);
         techpackGenerator(parsed.fields, parsed.files, context, writeStream);
 
@@ -168,8 +171,8 @@ async function techpackGenerator(fields, files, console, writeStream) {
         for (let view of fields[key_view]) {
             // Warp logo and composite on helmet
             const key_logo_file = `logo${i + 1}_${view}`;
-            const logo_path = `./assets/temp/${view}_logo_${i}.png`;
-            const mockup_path = `./assets/temp/${view}_mockup_${i}.png`;
+            const logo_path = path.join(os.tmpdir(), `${view}_logo_${i}.png`);
+            const mockup_path = path.join(os.tmpdir(), `${view}_mockup_${i}.png`);
             const key_width = `logoWidth${i + 1}_${view}`;
             const key_shift = `logoShift${i + 1}_${view}`;
             const key_pms = `pmsColor${i + 1}_${view}[]`;
@@ -401,14 +404,14 @@ async function techpackGenerator(fields, files, console, writeStream) {
         
         let folder = "./assets/renders";
         if (helmet_view == "Back") {
-            path = `${folder}/${(helmet_model == "Standard Brim") ? "SB" : "FB"}_C_${helmet_color}_${Array.from(helmet_view)[0]}.png`;
+            render_path = `${folder}/${(helmet_model == "Standard Brim") ? "SB" : "FB"}_C_${helmet_color}_${Array.from(helmet_view)[0]}.png`;
         } else {
-            path = `${folder}/${(helmet_model == "Standard Brim") ? "SB" : "FB"}_${(helmet_class == "Vented Class C") ? "C" : "E"}_${helmet_color}_${Array.from(helmet_view)[0]}.png`;
+            render_path = `${folder}/${(helmet_model == "Standard Brim") ? "SB" : "FB"}_${(helmet_class == "Vented Class C") ? "C" : "E"}_${helmet_color}_${Array.from(helmet_view)[0]}.png`;
         }
         sticker_path = `${folder}/Reflective_${sticker}_${(helmet_model == "Standard Brim") ? "SB" : "FB"}_${Array.from(helmet_view)[0]}${(blank) ? "_Blank" : ""}.png`;
 
         return {
-            helmet: path,
+            helmet: render_path,
             sticker: sticker_path,
         };
     }
