@@ -12,7 +12,6 @@ app.http('httpTriggerStreamResponse', {
     handler: async (request, context) => {
 
         // Remove temp files
-        /*
         await fs.readdir("./assets/temp", (err, files) => {
             for (let file of files) {
                 fs.unlink(`./assets/temp/${file}`, (err) => {
@@ -20,7 +19,6 @@ app.http('httpTriggerStreamResponse', {
                 });
             }
         });
-    */
 
         // Parse incoming data
         const data = Buffer.from(await request.arrayBuffer());
@@ -41,9 +39,16 @@ app.http('httpTriggerStreamResponse', {
         });
         writeStream.close()
 
-        const body = fs.createReadStream(filename);
+        const fileStream = fs.createReadStream(filename);
         
-        return {body};
+        return {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': `attachment; filename="${parsed.fields["companyName"][0].toLowerCase().split(" ").join("_")}_techpack_v${parsed.fields["verTechpack"][0]}.pdf"`
+            },
+            body: fileStream
+        };
     },
 });
 
