@@ -12,17 +12,6 @@ app.http('httpTriggerStreamResponse', {
     authLevel: 'anonymous',
     handler: async (request, context) => {
 
-        /*
-        // Remove temp files
-        await fs.readdir("./assets/temp", (err, files) => {
-            for (let file of files) {
-                fs.unlink(`./assets/temp/${file}`, (err) => {
-                    if (err) throw err;
-                });
-            }
-        });
-        */
-
         // Parse incoming data
         const data = Buffer.from(await request.arrayBuffer());
         const boundary = request.headers.get('content-type').split('boundary=')[1];
@@ -33,7 +22,11 @@ app.http('httpTriggerStreamResponse', {
         // Generate techpack
         const filename = path.join(os.tmpdir(), 'techpack.pdf');
         const writeStream = fs.createWriteStream(filename);
-        techpackGenerator(parsed.fields, parsed.files, context, writeStream);
+        const error = await techpackGenerator(parsed.fields, parsed.files, context, writeStream);
+
+        if (error == 1) {
+            return {status: 400, body: "Sorry - invalid combination of helmet model, class, and color!"};
+        }
 
         // Wait for techpack to finish
         await new Promise((resolve, reject) => {
@@ -232,6 +225,12 @@ async function techpackGenerator(fields, files, console, writeStream) {
             }
 
             const paths = generatePath(fields[key_model], fields[key_class], fields[key_color], view, sticker, blank);
+            try {
+                await loadImage(paths.helmet);
+            } catch (error) {
+                techpack.end();
+                return 1;
+            }
             await generateMockup(fields[key_model], view, paths, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), files[key_logo_file]["filename"], sticker, blank, console);
 
             // place render
@@ -378,6 +377,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
                 
     }
     techpack.end();
+    return 0;
 
     // return date string in format mm/dd/yyyy
     function getDate() {

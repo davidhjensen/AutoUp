@@ -5,26 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Mockup Form</title>
     <style>
-        .mockup-form { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
-        .entry-group { margin-bottom: 10px; }
-        .entry-group div { display: flex; gap: 10px; margin-bottom: 5px; }
-        .entry-group div input, .entry-group div select { flex: 0.3; padding: 5px; font-size: 12px; }
-        .entry-group input { height: 25%; } /* Text input height reduced */
-        select { height: 25%; } /* Dropdown height reduced */
-        h4 { margin-top: 20px; }
+        .mockup-form {
+          margin: 20px 0;
+          padding: 15px;
+          border: 5px solid #f47b20;
+          border-radius: 20px;
+          background-color: #F5F5F5;}
+        .view {
+          margin: 10px 0;
+          padding: 15px;
+          border: 5px solid #221f1f;
+          border-radius: 20px;
+          background-color: #F5F5F5;}
+        .entry-group div input, .entry-group div select {
+          width: min-content;
+          margin: 5px;
+          padding: 5px;
+          font-size: 12px; }
+        input { height: 25%; } /* Text input height reduced */
+        h4 { margin: 0px; }
+        .pms-container {
+          display: flex;
+          flex-direction: column;}
     </style>
 </head>
-<body>
-    <h1>Product Mockup Form</h1>
-    <form action="https://techpackgenerator.azurewebsites.net/api/httpTriggerStreamResponse?" method="POST" enctype="multipart/form-data">
-        <label for="companyName">Company Name:</label><br>
-        <input type="text" id="companyName" name="companyName" required><br><br>
-		
-		<label for="verTechpack">Techpack Version:</label><br>
-        <input type="number" id="verTechpack" name="verTechpack" min="1" step="1" value="1" required><br><br>
+<body style="background-color: #F5F5F5;">
+    <?xml version="1.0" encoding="UTF-8"?>
+    <div className="mockup-form"></div>
+    <svg width="400" height="100" id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 257.719184 44.997401">
+      <!-- Generator: Adobe Illustrator 29.5.1, SVG Export Plug-In . SVG Version: 2.1.0 Build 141)  -->
+      <defs>
+        <style>
+          .st0 {
+            fill: #221f1f;
+          }
 
-        <label for="numMockups">Number of Mockups:</label><br>
-        <input type="number" id="numMockups" name="numMockups" min="1" step="1" value="1" required><br><br>
+          .st1 {
+            fill: #f47b20;
+          }
+
+          .st2 {
+            fill: #010101;
+          }
+        </style>
+      </defs>
+      <g>
+        <g>
+          <g>
+            <path class="st0" d="M150.018012,8.583166h-13.66058v26.200945h13.66058c7.223236,0,13.100015-5.876779,13.100015-13.100015,0-7.224152-5.876779-13.100931-13.100015-13.100931ZM150.018012,28.218533h-7.095002v-13.069788h7.095002c3.602916,0,6.534436,2.931978,6.534436,6.535352s-2.93152,6.534436-6.534436,6.534436Z"/>
+            <path class="st0" d="M125.29771,23.589287c0,2.552772-2.076474,4.629246-4.628788,4.629246h-1.888241c-2.552314,0-4.628788-2.076474-4.628788-4.629246v-15.300143h-6.565579v15.300143c0,6.172633,5.021733,11.194824,11.194366,11.194824h1.888241c6.172633,0,11.194366-5.022191,11.194366-11.194824v-15.300143h-6.565579v15.300143Z"/>
+            <path class="st0" d="M208.939911,7.944745h-4.127072c-6.172633,0-11.194366,5.022191-11.194366,11.194824v4.449718c0,6.172633,5.021733,11.194824,11.194366,11.194824h4.127072c6.172633,0,11.194366-5.022191,11.194366-11.194824v-4.449718c0-6.172633-5.021733-11.194824-11.194366-11.194824ZM213.568699,23.589287c0,2.552772-2.076474,4.629246-4.628788,4.629246h-4.127072c-2.552314,0-4.628788-2.076474-4.628788-4.629246v-4.449718c0-2.552772,2.076474-4.629246,4.628788-4.629246h4.127072c2.552314,0,4.628788,2.076474,4.628788,4.629246v4.449718Z"/>
+          </g>
+          <polygon class="st0" points="241.881155 22.625701 229.595025 8.289144 224.082282 8.289144 224.082282 34.621472 230.64786 34.621472 230.64786 19.607623 243.51442 34.621472 248.446733 34.621472 248.446733 8.289144 241.881155 8.289144 241.881155 22.625701"/>
+          <path class="st0" d="M69.101452,18.361916l-9.740496.009155c-.909525,0-1.649652-.739171-1.649652-1.648741,0-.909525.740128-1.649607,1.649652-1.649607h11.215832s2.061052-.045504,3.08281-.514341c1.021439-.468746,1.601188-1.561743,1.601552-1.562471l2.37985-4.488774h-18.280045c-4.52986,0-8.215193,3.684878-8.215193,8.215193,0,4.529404,3.685333,8.214328,8.215193,8.214328h9.740496l.169944-.000911c.830315.086088,1.479709.788637,1.479709,1.640451,0,.90957-.740082,1.649652-1.649652,1.649652h-13.008372c-.452348.01781-2.085466.108635-2.960419.51015-1.021803.468837-1.601644,1.562608-1.601644,1.562608l.002369-.023002-2.394153,4.51583h19.962219c4.529905,0,8.215239-3.684924,8.215239-8.215239,0-4.529404-3.685333-8.214282-8.215239-8.214282Z"/>
+          <path class="st0" d="M183.069167,18.361916l-9.740496.009155c-.90957,0-1.649652-.739171-1.649652-1.648741,0-.909525.740082-1.649607,1.649652-1.649607h9.839019s2.061052-.045504,3.08281-.514341c.474713-.217861.849263-.569182,1.11937-.884427l2.739324-5.166818h-16.780522c-4.52986,0-8.215239,3.684878-8.215239,8.215193,0,4.529404,3.685379,8.214328,8.215239,8.214328h9.740496l.169898-.000911c.830315.086088,1.479754.788637,1.479754,1.640451,0,.90957-.740128,1.649652-1.649652,1.649652h-12.291156c-.452394.01781-2.085512.108635-2.960465.51015-1.021758.468837-1.601644,1.562608-1.601644,1.562608l.011251-.10827-2.439383,4.601098h19.281396c4.52986,0,8.215239-3.684924,8.215239-8.215239,0-4.529404-3.685379-8.214282-8.215239-8.214282Z"/>
+          <path class="st0" d="M84.3794,8.583159c-.647663.038079-1.943809.15432-2.689493.496485-.741995.34048-1.247089,1.006271-1.470143,1.347707l-2.503152,4.721394h10.398362v19.687558h6.565541V15.148745h9.824352v-6.565586h-20.125467Z"/>
+        </g>
+        <g>
+          <path class="st2" d="M252.601492,8.540405v3.388378h-.414766v-3.388378h-1.118968v-.352382h2.652702v.352382h-1.118968Z"/>
+          <path class="st2" d="M257.346007,11.928782v-3.419569h-.015736l-1.046469,3.419569h-.321472l-1.051527-3.419569h-.015736v3.419569h-.372615v-3.74076h.642381l.953174,3.025879h.010116l.938-3.025879h.653059v3.74076h-.373177Z"/>
+        </g>
+      </g>
+      <g>
+        <path class="st1" d="M11.63625,29.662218l-.002097.020407s.51405-.969744,1.419883-1.385289c.77567-.356002,2.223472-.436511,2.624516-.452305h11.266743c.806385,0,1.462479-.656094,1.462479-1.462444,0-.755193-.575725-1.378021-1.311804-1.454337l-.150675.000839h-8.36974c-4.015815,0-7.282971-3.266772-7.282971-7.282168,0-4.016234,3.267156-7.283006,7.282971-7.283006h15.26589L24.164653.687158c-.916246-.916211-2.41559-.916211-3.331871,0L.687211,20.832765c-.916281.916211-.916281,2.415555,0,3.331906l9.060218,9.060218,1.888821-3.562671Z"/>
+        <path class="st1" d="M44.31026,20.832765l-10.028076-10.028146-1.876067,3.53863h0s-.514085.969605-1.419918,1.385289c-.905798.415685-2.732979.455939-2.732979.455939h-9.677665c-.806315,0-1.462444.656094-1.462444,1.462444s.656129,1.461605,1.462444,1.461605l8.36974-.008107c4.015885,0,7.283006,3.266772,7.283006,7.282168,0,4.016234-3.267121,7.283006-7.283006,7.283006H10.188203l10.644579,10.644544c.916281.916351,2.415625.916351,3.331871,0l20.145606-20.145467c.916281-.916351.916281-2.415695,0-3.331906Z"/>
+      </g>
+    </svg>
+    <h1>Product Mockup Form</h1>
+    <form action="https://techpackgenerator.azurewebsites.net/api/httpTriggerStreamResponse?" method="POST" enctype="multipart/form-data" target="_blank" onsubmit="return validateForm()">    
+        <label for="companyName">Company Name:</label>
+        <input type="text" id="companyName" name="companyName" placeholder="Studson" required><br>
+		
+		    <label for="verTechpack">Techpack Version:</label>
+        <input type="number" id="verTechpack" name="verTechpack" value="1" min="1" step="1"required><br>
+
+        <label for="numMockups">Number of Mockups:</label>
+        <input type="number" id="numMockups" name="numMockups" min="1" step="1" value="1" required><br>
 
         <button type="button" id="generateForms">Generate Mockup Forms</button>
 
@@ -35,6 +91,7 @@
         <br><button type="submit">Submit</button>
         <button type="reset" onclick="mockupFormsContainer.innerHTML = ''">Reset Form</button>
     </form>
+    </div>
 
     <script>
         const generateFormsButton = document.getElementById('generateForms');
@@ -45,23 +102,23 @@
             mockupFormsContainer.innerHTML = ""; // Clear previous forms
 
             for (let i = 1; i <= numMockups; i++) {
-                const formDiv = document.createElement('div');
+                const formDiv = document.createElement('fieldset');
                 formDiv.className = 'mockup-form';
                 formDiv.innerHTML = `
-                    <h3>Mockup ${i}</h3>
-                    <label for="helmetModel${i}">Helmet Model:</label><br>
+                    <legend>Mockup ${i}</legend>
+                    <label for="helmetModel${i}">Helmet Model:</label>
                     <select id="helmetModel${i}" name="helmetModel${i}" required>
                         <option value="Standard Brim">Standard Brim</option>
                         <option value="Full Brim" selected="selected">Full Brim</option>
-                    </select><br><br>
+                    </select><br>
 
-                    <label for="helmetClass${i}">Helmet Class:</label><br>
+                    <label for="helmetClass${i}">Helmet Class:</label>
                     <select id="helmetClass${i}" name="helmetClass${i}" required>
                         <option value="Vented Class C" selected="selected">Vented Class C</option>
                         <option value="Non-Vented Class E">Non-Vented Class E</option>
-                    </select><br><br>
+                    </select><br>
 
-                    <label for="helmetColor${i}">Helmet Color:</label><br>
+                    <label for="helmetColor${i}">Helmet Color:</label>
                     <select id="helmetColor${i}" name="helmetColor${i}" required>
                         <option value="FiberMetal">FiberMetal</option>
                         <option value="ForestGreen">ForestGreen</option>
@@ -85,14 +142,14 @@
                         <option value="CarbonFiber">CarbonFiber</option>    
                         <option value="FishelYellow_109">FishelYellow_109</option>    
                         <option value="FishelYellow_123">FishelYellow_123</option> 
-                    </select><br><br>
+                    </select><br>
 
-					<label for="helmetSticker${i}">Stickers:</label><br>
+					          <label for="helmetSticker${i}">Stickers:</label>
                     <select id="helmetSticker${i}" name="helmetSticker${i}" required>
                         <option value="None" selected="selected">None</option>
                         <option value="Grey">Grey</option>
                         <option value="Flash">Flash</option>
-                    </select><br><br>
+                    </select><br>
 
                     <label for="views${i}">Views (select multiple):</label><br>
                     <select id="views${i}" name="views${i}[]" multiple required onchange="generateLogoAndPmsFields(${i})">
@@ -100,7 +157,7 @@
                         <option value="Left">Left</option>
                         <option value="Right">Right</option>
                         <option value="Back">Back</option>
-                    </select><br><br>
+                    </select>
 
                     <div id="logosContainer${i}" class="entry-group"></div>
                 `;
@@ -116,16 +173,17 @@
             container.innerHTML = ""; // Clear existing fields
 
             selectedViews.forEach(view => {
-                const section = document.createElement('div');
+                const section = document.createElement('fieldset');
+                section.className = 'view';
                 section.innerHTML = `
-                    <h4>${view} View</h4>
+                    <h4>${view} View:</h4>
                     <label for="logoType${mockupNumber}_${view}">Logo Type:</label>
                     <select name="logoType${mockupNumber}_${view}" onchange="updateLogoFields(this, ${mockupNumber}, '${view}')"}>
                         <option value="New Logo" selected>New Logo</option>
                         <option value="Same Logo (as previous)" ${mockupNumber === 1 ? 'disabled' : ''}>Same Logo (as previous)</option>
                         <option value="American Flag">American Flag</option>
                         <option value="American Flag (transparent)">American Flag (transparent)</option>
-						<option value="American Flag (reverse)">American Flag (reverse)</option>
+                        <option value="American Flag (reverse)">American Flag (reverse)</option>
                         <option value="American Flag (transparent) (reverse)">American Flag (transparent) (reverse)</option>
                         <option value="Blank">Blank</option>
                     </select><br>
@@ -135,41 +193,44 @@
                         <input type="file" name="logo${mockupNumber}_${view}" accept=".svg,.png,.jpg" required><br>
 
                         <label for="logoWidth${mockupNumber}_${view}">Width (inches):</label>
-                        <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.005" placeholder="Width (inches)" required><br>
+                        <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.005" placeholder="Width (inches)" min="0" required><br>
 
                         <label for="logoShift${mockupNumber}_${view}">Vertical Shift:</label>
-                        <input type="number" name="logoShift${mockupNumber}_${view}" step="0.05" value="0" placeholder="Vertical Shift (inches)" required><br>
+                        <input type="number" name="logoShift${mockupNumber}_${view}" step="0.05" value="0" placeholder="Vertical Shift (inches)" required>
                     </div>
-
-                    <label>PMS Color:</label>
-                    <div id="pmsColorsContainer${mockupNumber}_${view}" class="entry-group"></div>
-                    <button type="button" onclick="addPmsColor(${mockupNumber}, '${view}')">Add Another PMS Color</button>
+                    
+                    <button type="button" id="addPmsColor(${mockupNumber}, '${view}')" onclick="addPmsColor(${mockupNumber}, '${view}')">Add Another PMS Color</button>   
+                    <div id="pmsColorsContainer${mockupNumber}_${view}" class="pms-container"></div>
                 `;
                 container.appendChild(section);
-				addPmsColor(`${mockupNumber}`, `${view}`);
+				        addPmsColor(`${mockupNumber}`, `${view}`);
             });
         }
 
         function updateLogoFields(select, mockupNumber, view) {
             const logoFields = document.getElementById(`logoFields${mockupNumber}_${view}`);
             const pmsColorsContainer = document.getElementById(`pmsColorsContainer${mockupNumber}_${view}`);
-			pmsColorsContainer.innerHTML = ""; // Clear PMS fields
+            const pmsButton = document.getElementById(`addPmsColor(${mockupNumber}, '${view}')`);
+			      pmsColorsContainer.innerHTML = ""; // Clear PMS fields
+
             switch (select.value) {
                 case "Same Logo (as previous)":
-				case "Blank":
+				        case "Blank":
                     logoFields.innerHTML = ""; // Clear fields for "Same Logo (as previous)"
+                    pmsButton.disabled = true;
                     break;
-					case "American Flag":
-					case "American Flag (transparent)":
-					case "American Flag (reverse)":
-                	case "American Flag (transparent) (reverse)":
-                    logoFields.innerHTML = `
-                        <label for="logoWidth${mockupNumber}_${view}">Width (inches):</label>
-                        <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05" placeholder="Width (inches)" required><br>
+                case "American Flag":
+                case "American Flag (transparent)":
+                case "American Flag (reverse)":
+                case "American Flag (transparent) (reverse)":
+                          logoFields.innerHTML = `
+                              <label for="logoWidth${mockupNumber}_${view}">Width (inches):</label>
+                              <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05" placeholder="Width (inches)" required><br><br>
 
-                        <label for="logoShift${mockupNumber}_${view}">Vertical Shift:</label>
-                        <input type="number" name="logoShift${mockupNumber}_${view}" step="0.05" value="0" placeholder="Vertical Shift (inches)" required><br>
-                    `;
+                              <label for="logoShift${mockupNumber}_${view}">Vertical Shift:</label>
+                              <input type="number" name="logoShift${mockupNumber}_${view}" step="0.05" value="0" placeholder="Vertical Shift (inches)" required><br><br>
+                          `;
+                          pmsButton.disabled = true;
                     break;
                 default: // "New Logo"
                     logoFields.innerHTML = `
@@ -181,7 +242,10 @@
 
                         <label for="logoShift${mockupNumber}_${view}">Vertical Shift:</label>
                         <input type="number" name="logoShift${mockupNumber}_${view}" step="0.05" value="0" placeholder="Vertical Shift (inches)" required><br>
-                    `;
+                        
+                        <label>PMS Color:</label>
+                        `;
+                        pmsButton.disabled = false;
 					addPmsColor(`${mockupNumber}`, `${view}`);
                     break;
             }
@@ -1211,16 +1275,16 @@
 
         function addPmsColor(mockupNumber, view) {
             const container = document.getElementById(`pmsColorsContainer${mockupNumber}_${view}`);
-            if (container.children.length >= 7) return; // Limit to 7 colors
+            if (container.children.length >= 6) return; // Limit to 6 colors
 
             const newEntry = document.createElement('div');
             newEntry.innerHTML = `
-                <select name="pmsColor${mockupNumber}_${view}[]" style="width: 200px; height: 35px;" onchange="updatePmsArrays(this, ${mockupNumber}, '${view}')" required>
+            <select name="pmsColor${mockupNumber}_${view}[]" onchange="updatePmsArrays(this, ${mockupNumber}, '${view}')" required>
                     <option value="PMS NEEDED,F5F5F5"selected>PMS Colors Needed</option>
+                    <option value="REMOVE" ${container.children.length === 0 ? 'disabled' : ''}>REMOVE</option>
                     ${Object.entries(pmsColors).map(([key, value]) => `<option value="${key},${value}">${key}</option>`).join('')}
                 </select>
-                <button type="button" onclick="removePmsColor(this, ${mockupNumber}, '${view}')">Remove</button>
-            `;
+                `;
             container.appendChild(newEntry);
         }
 
@@ -1228,6 +1292,9 @@
             const selectedOption = selectElement.selectedOptions[0];
             const pmsCode = selectedOption.value;
             const hexCode = selectedOption.dataset.hex;
+
+            // Remove PMS if selected
+            if(pmsCode==="REMOVE") removePmsColor(selectElement, mockupNumber, view);
 
             // Ensure arrays exist
             if (!window.pmsCode) window.pmsCode = [];
@@ -1255,7 +1322,14 @@
             // Remove the dropdown entry
             parentDiv.remove();
         }
+
+        function validateForm() {
+          let x = document.getElementById('mockupFormsContainer').innerHTML;
+          if (x == "") {
+            alert("Mockups must be generated");
+            return false;
+          }
+        }
     </script>
 </body>
 </html>
-
