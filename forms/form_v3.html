@@ -72,7 +72,7 @@
       </g>
     </svg>
     <h1>Product Mockup Form</h1>
-    <form action="https://techpackgenerator.azurewebsites.net/api/httpTriggerStreamResponse?" method="POST" enctype="multipart/form-data" target="_blank" onsubmit="return validateForm()">    
+    <form action="http://localhost:7071/api/httpTriggerStreamResponse" method="POST" enctype="multipart/form-data" target="_blank" onsubmit="return validateForm()">    
         <label for="companyName">Company Name:</label>
         <input type="text" id="companyName" name="companyName" placeholder="Studson" required><br>
 		
@@ -105,7 +105,7 @@
                 const formDiv = document.createElement('fieldset');
                 formDiv.className = 'mockup-form';
                 formDiv.innerHTML = `
-                    <legend>Mockup ${i}</legend>
+                    <legend><b>Mockup ${i}</b></legend>
                     <label for="helmetModel${i}">Helmet Model:</label>
                     <select id="helmetModel${i}" name="helmetModel${i}" required>
                         <option value="Standard Brim">Standard Brim</option>
@@ -176,7 +176,7 @@
                 const section = document.createElement('fieldset');
                 section.className = 'view';
                 section.innerHTML = `
-                    <h4>${view} View:</h4>
+                    <legend><b>${view} View</b></legend>
                     <label for="logoType${mockupNumber}_${view}">Logo Type:</label>
                     <select name="logoType${mockupNumber}_${view}" onchange="updateLogoFields(this, ${mockupNumber}, '${view}')"}>
                         <option value="New Logo" selected>New Logo</option>
@@ -253,6 +253,8 @@
 
         const pmsColors = {
 		"White": "FFFFFF",
+		"287 CV": "00529b",
+		"Black 3 50%": "939598",
 		"7638": "7E2D40",
 		"7576": "DB864E",
 		"7635": "C63663",

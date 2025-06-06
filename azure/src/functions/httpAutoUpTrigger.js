@@ -152,9 +152,9 @@ async function techpackGenerator(fields, files, console, writeStream) {
         techpack
             .font("./assets/fonts/Cantarell-Regular.ttf")
             .fillColor("#000000")
-            .fontSize(30)
-            .text("DATE:\nCUSTOMER:\nHELMET STYLE:\nCOLOR:\nCERTIFICATIONS:\nVERSION", 675, 50)
-            .text(`${getDate()}\n${fields["companyName"]}\nSHK-1 ${fields[key_model]} ${fields[key_class]}\n${fields[key_color]}\nANSI Z89.1 - 2014 TYPE II\n${getVersion(fields["verTechpack"][0])}`, 975, 50);
+            .fontSize(28)
+            .text("DATE:\nCUSTOMER:\nHELMET STYLE:\nCOLOR:\nCERTIFICATIONS:\nVERSION", 675, 75)
+            .text(`${getDate()}\n${fields["companyName"]}\nSHK-1 ${fields[key_model]} ${fields[key_class]}\n${fields[key_color]}\nANSI Z89.1 - 2014 TYPE II\n${getVersion(fields["verTechpack"][0])}`, 950, 75);
 
         // Generate each view's mockup
         let view_num = 0;
@@ -341,7 +341,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
 
         // Signature box
         const signature_x = ((num_views == 1) ? 1000 : 1700);
-        const signature_y = ((num_views == 1) ? 1350 : 50);
+        const signature_y = ((num_views == 1) ? 1350 : 75);
         techpack
             .strokeColor([0, 0, 0, 100])
             .lineWidth(1)
