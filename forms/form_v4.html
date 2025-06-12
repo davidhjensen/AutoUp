@@ -5,8 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Custom Logo Techpack Generator</title>
     <style>
+		@font-face {
+			font-family: Industry;
+			font-weight: medium;
+			src: url("./Industry-Medium.otf");
+		}		
+		@font-face {
+			font-family: Industry;
+			font-weight: bold;
+			src: url("./Industry-Bold.otf");
+		}
+		@font-face {
+			font-family: Industry;
+			src: url("./Industry-Book.otf");
+		}
 		body, select, input, button {
-			font-family: "Cantarell";
+			font-family: "Industry";
 		}
 		button {
 			color:#F5F5F5;
@@ -16,9 +30,10 @@
 			padding: 5px;
 			cursor: pointer;
   			clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+			margin-bottom: 5px;
 		}
 		button:hover {
-			background-color: #010101;
+			background-color: #282828;
 		}
 		button:disabled {
 			background-color: #AAAAAA;
@@ -26,6 +41,7 @@
 		}
 		select {
 			cursor: pointer;
+			padding: 5px;
 		}
         .mockup-form {
 			margin: 20px 0;
@@ -36,7 +52,7 @@
 			border-top: 6px solid #f47b20;
 			border-bottom: 6px solid #f47b20;
 			background-color: #F5F5F5;
-			font-family: "Cantarell";
+			font-family: "Industry";
 		}
 		.mockup-form label {
 			display: inline-block;
@@ -60,8 +76,8 @@
 			font-size: 18px;
 			color: #F5F5F5;
 			height: 30px;
-			width: 140px;
-			background-color: #010101;
+			width: 200px;
+			background-color: #282828;
 			display: flex;
 			align-items: center;
   			clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
@@ -72,24 +88,29 @@
 			padding-bottom: 0px;
 			padding-top: 10px;
 			border: transparent;
-			border-top: 6px solid #010101;
+			border-top: 6px solid #282828;
 			background-color: #F5F5F5;
-			font-family: "Cantarell";
+			font-family: "Industry";
 		}
-		.entry-group div input, .entry-group div select {
-			width: 100 px;
-			margin: 5px;
+		.entry-group div input {
+			width: 50px;
+			height: 25%;
+			margin-bottom: 5px;
 			padding: 5px;
 			font-size: 12px;
-			font-family: "Cantarell";}
+			font-family: "Industry";
+		}
 		input, select { height: 25%;
 			width: 150px;
-			font-family: "Cantarell";} /* Text input height reduced */
+			font-family: "Industry"; /* Text input height reduced */
+			margin-bottom: 5px;
+		}
 		h4 { margin: 0px; }
 		.pms-container {
 			display: flex;
 			flex-direction: column;
-			font-family: "Cantarell";
+			font-family: "Industry";
+			padding: 5px;
 			padding-left: 50px;
 		}
 		label {
@@ -103,7 +124,7 @@
     </style>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Cantarell:ital,wght@0,400;0,700;1,400;1,700&family=Figtree:ital,wght@0,300..900;1,300..900&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Industry:ital,wght@0,400;0,700;1,400;1,700&family=Figtree:ital,wght@0,300..900;1,300..900&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
 </head>
 <body style="background-color: #F5F5F5;">
     <?xml version="1.0" encoding="UTF-8"?>
@@ -121,7 +142,7 @@
           }
 
           .st2 {
-            fill: #010101;
+            fill: #282828;
           }
         </style>
       </defs>
@@ -257,7 +278,7 @@
                 section.innerHTML = `
                     <legend><b>${view} View</b></legend>
                     <label for="logoType${mockupNumber}_${view}">Logo Type:</label>
-                    <select name="logoType${mockupNumber}_${view}" onchange="updateLogoFields(this, ${mockupNumber}, '${view}')"}>
+                    <select style="width: fit-content" name="logoType${mockupNumber}_${view}" onchange="updateLogoFields(this, ${mockupNumber}, '${view}')"}>
                         <option value="New Logo" selected>New Logo</option>
                         <option value="Same Logo (as previous)" ${mockupNumber === 1 ? 'disabled' : ''}>Same Logo (as previous)</option>
                         <option value="American Flag">American Flag</option>
@@ -269,7 +290,7 @@
 
                     <div id="logoFields${mockupNumber}_${view}">
                         <label for="logo${mockupNumber}_${view}">Logo:</label>
-                        <input type="file" name="logo${mockupNumber}_${view}" accept=".svg,.png,.jpg" required><br>
+                        <input style="width: fit-content" type="file" name="logo${mockupNumber}_${view}" accept=".svg,.png,.jpg" required><br>
 
                         <label for="logoWidth${mockupNumber}_${view}">Width:</label>
                         <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}>
@@ -318,7 +339,7 @@
                 default: // "New Logo"
                     logoFields.innerHTML = `
                         <label for="logo${mockupNumber}_${view}">Logo:</label>
-                        <input type="file" name="logo${mockupNumber}_${view}" accept=".svg,.png,.jpg" required><br>
+                        <input type="file" style="width: fit-content" name="logo${mockupNumber}_${view}" accept=".svg,.png,.jpg" required><br>
 
                         <label for="logoWidth${mockupNumber}_${view}">Width:</label>
                         <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}>
