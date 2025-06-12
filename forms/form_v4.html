@@ -17,6 +17,11 @@
 		}
 		@font-face {
 			font-family: Industry;
+			font-weight: itallic;
+			src: url("./Industry-Bold.otf");
+		}
+		@font-face {
+			font-family: Industry;
 			src: url("./Industry-Book.otf");
 		}
 		body, select, input, button {
@@ -303,6 +308,7 @@
                     
                     <button style="margin-left: 50px" type="button" id="addPmsColor(${mockupNumber}, '${view}')" onclick="addPmsColor(${mockupNumber}, '${view}')">Add Another PMS Color</button>   
                     <div id="pmsColorsContainer${mockupNumber}_${view}" class="pms-container"></div>
+					<small style="font-family: Industry; margin: 50px"><i>*Select </i>REMOVE<i> to remove the PMS color</i></small>
                 `;
                 container.appendChild(section);
 				        addPmsColor(`${mockupNumber}`, `${view}`);
