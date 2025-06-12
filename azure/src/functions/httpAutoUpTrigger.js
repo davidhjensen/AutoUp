@@ -128,17 +128,17 @@ async function techpackGenerator(fields, files, console, writeStream) {
         // STUDSON logo
         const studson_logo_path = './assets/logos/studson_logo.svg';
         const studson_logo = fs.readFileSync(studson_logo_path, "utf8");
-        techpack.addSVG(studson_logo, 50, 75, {
+        techpack.addSVG(studson_logo, 50, 100, {
             width: 600,
             height: 105,
         });
 
         // CUSTOM BRANDING
         techpack
-            .font("./assets/fonts/Cantarell-Bold.ttf")
-            .fillColor("#000000")
-            .fontSize("50")
-            .text("CUSTOM BRANDING", 50, 200, {
+            .font("./assets/fonts/Industry-Bold.otf")
+            .fillColor("#282828")
+            .fontSize("60")
+            .text("CUSTOM BRANDING", 50, 225, {
                 align: "center",
                 width: 600
             });
@@ -150,11 +150,11 @@ async function techpackGenerator(fields, files, console, writeStream) {
         const key_sticker = `helmetSticker${i + 1}`;
 
         techpack
-            .font("./assets/fonts/Cantarell-Regular.ttf")
-            .fillColor("#000000")
+            .font("./assets/fonts/Industry-Book.otf")
+            .fillColor("#282828")
             .fontSize(28)
-            .text("DATE:\nCUSTOMER:\nHELMET STYLE:\nCOLOR:\nCERTIFICATIONS:\nVERSION", 675, 75)
-            .text(`${getDate()}\n${fields["companyName"]}\nSHK-1 ${fields[key_model]} ${fields[key_class]}\n${fields[key_color]}\nANSI Z89.1 - 2014 TYPE II\n${getVersion(fields["verTechpack"][0])}`, 950, 75);
+            .text("DATE:\nCUSTOMER:\nHELMET STYLE:\nCOLOR:\nCERTIFICATIONS:\nVERSION", 700, 75)
+            .text(`${getDate()}\n${fields["companyName"]}\nSHK-1 ${fields[key_model]} ${fields[key_class]}\n${fields[key_color]}\nANSI Z89.1 - 2014 TYPE II\n${getVersion(fields["verTechpack"][0])}`, 975, 75);
 
         // Generate each view's mockup
         let view_num = 0;
@@ -242,9 +242,9 @@ async function techpackGenerator(fields, files, console, writeStream) {
                 align: "center",
             });
             techpack
-                .font("./assets/fonts/Cantarell-Bold.ttf")
+                .font("./assets/fonts/Industry-Bold.otf")
                 .fontSize(30)
-                .fillColor([0, 0, 0, 100])
+                .fillColor("#282828")
                 .text(`${view}`, 300 + view_num * 1000, 1000, {
                     width: 1000,
                     align: "center"
@@ -271,9 +271,9 @@ async function techpackGenerator(fields, files, console, writeStream) {
                         let color_name = pms_colors[index].split(",")[0];
                         color_name = (isNaN(parseInt(color_name[0]))) ? `${color_name} C` : `PMS ${color_name}`;
                         techpack
-                            .font("./assets/fonts/Cantarell-Regular.ttf")
+                            .font("./assets/fonts/Industry-Book.otf")
                             .fontSize(30)
-                            .fillColor([0, 100, 0, 0])
+                            .fillColor([244, 123, 32])
                             .text(`${color_name}`, x + 75, y + 25 + 75 * index, {
                                 baseline: "middle",
                             });
@@ -294,9 +294,9 @@ async function techpackGenerator(fields, files, console, writeStream) {
                 } else if (!blank) {
                     dim_width = 400;
                     techpack
-                    .font("./assets/fonts/Cantarell-Regular.ttf")
+                    .font("./assets/fonts/Industry-Book.otf")
                     .fontSize(30)
-                    .fillColor([0, 100, 0, 0])
+                    .fillColor([244, 123, 32])
                     .text(`VECTOR FILE NEEDED`, x + 400, y + 200, {
                         align: "center",
                         width: 400
@@ -306,7 +306,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
                 // logo dimensions
                 if (!blank) {
                     techpack
-                        .strokeColor([0, 100, 0, 0])
+                        .strokeColor([244, 123, 32])
                         .lineWidth(2)
                         .moveTo(x + 400, y + 325)
                         .lineTo(x + 400, y + 350)
@@ -314,9 +314,9 @@ async function techpackGenerator(fields, files, console, writeStream) {
                         .lineTo(x + 400 + dim_width, y + 325)
                         .stroke();
                     techpack
-                        .font("./assets/fonts/Cantarell-Regular.ttf")
+                        .font("./assets/fonts/Industry-Book.otf")
                         .fontSize(30)
-                        .fillColor([0, 100, 0, 0])
+                        .fillColor([244, 123, 32])
                         .text(`${fields[key_width]} in`, x + 400, y + 375, {
                             align: "center",
                             width: dim_width
@@ -331,19 +331,19 @@ async function techpackGenerator(fields, files, console, writeStream) {
         // Divider line
         techpack
             .lineWidth(2)
-            .strokeColor([0, 100, 0, 0])
+            .strokeColor([244, 123, 32])
             .moveTo(100, 1050)
             .lineTo(page_width - 100, 1050)
             .stroke();
         techpack
-            .font("./assets/fonts/Cantarell-Regular.ttf")
+            .font("./assets/fonts/Industry-Bold.otf")
             .fontSize(20)
-            .fillColor([0, 100, 0, 0])
+            .fillColor([244, 123, 32])
             .text("FINAL ARTWORK AT 100% ACTUAL SIZE", 100, 1050);
 
         // Signature box
         const signature_x = ((num_views == 1) ? 1000 : 1700);
-        const signature_y = ((num_views == 1) ? 1350 : 75);
+        const signature_y = ((num_views == 1) ? 1350 : 128);
         techpack
             .strokeColor([0, 0, 0, 100])
             .lineWidth(1)
@@ -354,7 +354,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
             .lineTo(signature_x + 480, signature_y + 130)
             .stroke();
         techpack
-            .font("./assets/fonts/Cantarell-Bold.ttf")
+            .font("./assets/fonts/Industry-Bold.otf")
             .fontSize(10)
             .fillColor([0, 0, 0, 100])
             .text("SIGNATURE FOR APPROVAL", signature_x + 20, signature_y + 132, {
@@ -376,7 +376,19 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     backgroundColor: "#FFFFFF",
                     format: "mm/dd/yy",
                 })
-                
+        
+        // STYLE BOX AROUND STUDSON
+        techpack.moveTo(30, 55)
+                .lineTo(((num_views == 1) ? 1420 : 2420), 55)
+                .lineTo(((num_views == 1) ? 1570 : 2570), 205)
+                .lineTo(((num_views == 1) ? 1570 : 2570), 350)
+                .lineTo(30, 350)
+                .lineTo(30, 55)
+                .moveTo(675, 55)
+                .lineTo(675, 350)
+                .strokeColor([244, 123, 32])
+                .lineWidth(5)
+                .stroke();
     }
     techpack.end();
     return 0;
