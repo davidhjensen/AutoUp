@@ -3,38 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Mockup Form</title>
+    <title>Custom Logo Techpack Generator</title>
     <style>
-		body, button, select, input {
+		body, select, input, button {
 			font-family: "Cantarell";
 		}
+		button {
+			color:#F5F5F5;
+			border: 0px;
+			background-color: #f47b20;
+			font-weight: bold;
+			padding: 5px;
+			cursor: pointer;
+  			clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+		}
+		button:hover {
+			background-color: #010101;
+		}
+		button:disabled {
+			background-color: #AAAAAA;
+			cursor: not-allowed;
+		}
+		select {
+			cursor: pointer;
+		}
         .mockup-form {
-          margin: 20px 0;
-          padding: 15px;
-          border: 5px solid #f47b20;
-          border-radius: 20px;
-          background-color: #F5F5F5;
-		  font-family: "Cantarell";}
-        .view {
-          margin: 10px 0;
-          padding: 15px;
-          border: 5px solid #221f1f;
-          border-radius: 20px;
-          background-color: #F5F5F5;
-		  font-family: "Cantarell";}
-        .entry-group div input, .entry-group div select {
-          width: min-content;
-          margin: 5px;
-          padding: 5px;
-          font-size: 12px;
-		  font-family: "Cantarell";}
-        input { height: 25%;
-		  font-family: "Cantarell";} /* Text input height reduced */
-        h4 { margin: 0px; }
-        .pms-container {
-          display: flex;
-          flex-direction: column;
-		  font-family: "Cantarell";}
+			margin: 20px 0;
+			padding: 0px;
+			padding-bottom: 10px;
+			padding-top: 10px;
+			border: transparent;
+			border-top: 6px solid #f47b20;
+			border-bottom: 6px solid #f47b20;
+			background-color: #F5F5F5;
+			font-family: "Cantarell";
+		}
+		.mockup-form label {
+			display: inline-block;
+			width: 130px;
+			padding-left: 50px;
+		}
+		.mockup-form legend {
+			font-weight: bold;
+			font-size: 25px;
+			padding-left: 50px;
+			color: #F5F5F5;
+			height: 50px;
+			width: 250px;
+			background-color: #f47b20;
+			display: flex;
+			align-items: center;
+  			clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 0 100%);
+		}
+		.mockup-form fieldset legend {
+			font-weight: bold;
+			font-size: 18px;
+			color: #F5F5F5;
+			height: 30px;
+			width: 140px;
+			background-color: #010101;
+			display: flex;
+			align-items: center;
+  			clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+		}
+		.view {
+			margin: 20px 0;
+			padding: 0px;
+			padding-bottom: 0px;
+			padding-top: 10px;
+			border: transparent;
+			border-top: 6px solid #010101;
+			background-color: #F5F5F5;
+			font-family: "Cantarell";
+		}
+		.entry-group div input, .entry-group div select {
+			width: 100 px;
+			margin: 5px;
+			padding: 5px;
+			font-size: 12px;
+			font-family: "Cantarell";}
+		input, select { height: 25%;
+			width: 150px;
+			font-family: "Cantarell";} /* Text input height reduced */
+		h4 { margin: 0px; }
+		.pms-container {
+			display: flex;
+			flex-direction: column;
+			font-family: "Cantarell";
+			padding-left: 50px;
+		}
+		label {
+			display: inline-block;
+			width: 180px;
+		}
+		.mockup_input_label {
+			display: inline-block;
+			width: 140px;
+		}
     </style>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -82,13 +147,14 @@
         <path class="st1" d="M44.31026,20.832765l-10.028076-10.028146-1.876067,3.53863h0s-.514085.969605-1.419918,1.385289c-.905798.415685-2.732979.455939-2.732979.455939h-9.677665c-.806315,0-1.462444.656094-1.462444,1.462444s.656129,1.461605,1.462444,1.461605l8.36974-.008107c4.015885,0,7.283006,3.266772,7.283006,7.282168,0,4.016234-3.267121,7.283006-7.283006,7.283006H10.188203l10.644579,10.644544c.916281.916351,2.415625.916351,3.331871,0l20.145606-20.145467c.916281-.916351.916281-2.415695,0-3.331906Z"/>
       </g>
     </svg>
-    <h1>Product Mockup Form</h1>
-    <form action="https://techpackgenerator.azurewebsites.net/api/httpTriggerStreamResponse?" method="POST" enctype="multipart/form-data" target="_blank" onsubmit="return validateForm()">    
-        <label for="companyName">Company Name:</label>
-        <input type="text" id="companyName" name="companyName" placeholder="Studson" required><br>
+    <h1>Custom Logo Techpack Generator</h1>
+    <form id="maindoc" action="https://techpackgenerator.azurewebsites.net/api/httpTriggerStreamResponse?" method="POST" enctype="multipart/form-data" target="_blank" onsubmit="return validateForm()">    
+
+		<label for="companyName">Company Name:</label>
+        <input type="text" id="companyName" name="companyName" required><br>
 		
-		    <label for="verTechpack">Techpack Version:</label>
-        <input type="number" id="verTechpack" name="verTechpack" value="1" min="1" step="1"required><br>
+		<label for="verTechpack">Techpack Version:</label>
+        <input type="number" id="verTechpack" name="verTechpack" value="1" min="1" step="1" required><br>
 
         <label for="numMockups">Number of Mockups:</label>
         <input type="number" id="numMockups" name="numMockups" min="1" step="1" value="1" required><br>
@@ -97,10 +163,11 @@
 
         <div id="mockupFormsContainer"></div>
 
+		<br><button type="submit">Submit</button>
+		<button type="reset" onclick="mockupFormsContainer.innerHTML = ''">Reset Form</button>
+	
         <input type="hidden" name="submissionId" value="${Date.now()}">
 
-        <br><button type="submit">Submit</button>
-        <button type="reset" onclick="mockupFormsContainer.innerHTML = ''">Reset Form</button>
     </form>
     </div>
 
@@ -109,7 +176,8 @@
         const mockupFormsContainer = document.getElementById('mockupFormsContainer');
 
         generateFormsButton.addEventListener('click', () => {
-            const numMockups = parseInt(document.getElementById('numMockups').value) || 0;
+			const numMockups = parseInt(document.getElementById('numMockups').value) || 0;
+
             mockupFormsContainer.innerHTML = ""; // Clear previous forms
 
             for (let i = 1; i <= numMockups; i++) {
@@ -162,15 +230,15 @@
                         <option value="Flash">Flash</option>
                     </select><br>
 
-                    <label for="views${i}">Views (hold ctrl key to select multiple):</label><br>
-                    <select id="views${i}" name="views${i}[]" multiple required onchange="generateLogoAndPmsFields(${i})">
+                    <label style="width: fit-content" for="views${i}">Views (hold ctrl key to select multiple):</label><br>
+                    <select style="margin-left: 180px" id="views${i}" name="views${i}[]" multiple required onchange="generateLogoAndPmsFields(${i})">
                         <option value="Front">Front</option>
                         <option value="Left">Left</option>
                         <option value="Right">Right</option>
                         <option value="Back">Back</option>
                     </select>
 
-                    <div id="logosContainer${i}" class="entry-group"></div>
+                    <div id="logosContainer${i}" class="entry-group" style="padding-left:50px"></div>
                 `;
                 mockupFormsContainer.appendChild(formDiv);
             }
@@ -203,14 +271,16 @@
                         <label for="logo${mockupNumber}_${view}">Logo:</label>
                         <input type="file" name="logo${mockupNumber}_${view}" accept=".svg,.png,.jpg" required><br>
 
-                        <label for="logoWidth${mockupNumber}_${view}">Width (inches):</label>
-                        <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}><br>
+                        <label for="logoWidth${mockupNumber}_${view}">Width:</label>
+                        <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}>
+						<span>in.</span><br>
 
-                        <label for="logoShift${mockupNumber}_${view}">Vertical Shift (inches):</label>
+                        <label for="logoShift${mockupNumber}_${view}">Vertical Shift:</label>
                         <input type="number" name="logoShift${mockupNumber}_${view}" step="0.05" value="0"  min="-2" max="2" required>
-                    </div>
+                    	<span>in.</span><br>
+					</div>
                     
-                    <button type="button" id="addPmsColor(${mockupNumber}, '${view}')" onclick="addPmsColor(${mockupNumber}, '${view}')">Add Another PMS Color</button>   
+                    <button style="margin-left: 50px" type="button" id="addPmsColor(${mockupNumber}, '${view}')" onclick="addPmsColor(${mockupNumber}, '${view}')">Add Another PMS Color</button>   
                     <div id="pmsColorsContainer${mockupNumber}_${view}" class="pms-container"></div>
                 `;
                 container.appendChild(section);
@@ -234,27 +304,29 @@
                 case "American Flag (transparent)":
                 case "American Flag (reverse)":
                 case "American Flag (transparent) (reverse)":
-                          logoFields.innerHTML = `
-                              <label for="logoWidth${mockupNumber}_${view}">Width (inches):</label>
-                              <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}><br><br>
+					logoFields.innerHTML = `
+						<label for="logoWidth${mockupNumber}_${view}">Width:</label>
+						<input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}>
+						<span>in.</span><br>
 
-                              <label for="logoShift${mockupNumber}_${view}">Vertical Shift (inches):</label>
-                              <input type="number" name="logoShift${mockupNumber}_${view}" step="0.05" value="0"  required min="-2" max="2" ><br><br>
-                          `;
-                          pmsButton.disabled = true;
-                    break;
+						<label for="logoShift${mockupNumber}_${view}">Vertical Shift:</label>
+						<input type="number" name="logoShift${mockupNumber}_${view}" step="0.05" value="0"  required min="-2" max="2">
+						<span>in.</span>
+						`;
+					pmsButton.disabled = true;
+					break;
                 default: // "New Logo"
                     logoFields.innerHTML = `
                         <label for="logo${mockupNumber}_${view}">Logo:</label>
                         <input type="file" name="logo${mockupNumber}_${view}" accept=".svg,.png,.jpg" required><br>
 
-                        <label for="logoWidth${mockupNumber}_${view}">Width (inches):</label>
-                        <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}><br>
-
-                        <label for="logoShift${mockupNumber}_${view}">Vertical Shift (inches):</label>
-                        <input type="number" name="logoShift${mockupNumber}_${view}" step="0.05" value="0"  required min="-2" max="2" ><br>
+                        <label for="logoWidth${mockupNumber}_${view}">Width:</label>
+                        <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}>
+						<span>in.</span><br>
                         
-                        <label>PMS Color:</label>
+						<label for="logoShift${mockupNumber}_${view}">Vertical Shift:</label>
+                        <input type="number" name="logoShift${mockupNumber}_${view}" step="0.05" value="0"  required min="-2" max="2">
+                        <span>in.</span>
                         `;
                         pmsButton.disabled = false;
 					addPmsColor(`${mockupNumber}`, `${view}`);
