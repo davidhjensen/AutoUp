@@ -253,75 +253,77 @@ async function techpackGenerator(fields, files, console, writeStream) {
             // Place logo with dimensions and colors...
             //      NOTE: Anchor is top right corner of the first square
             //      and that the dimesion line for the logo is 350pt below the anchor
+            
+            if (!blank) {
+                // Logo PMS colors
+                const x = view_num * 1000 + ((fields[key_view].length == 1) ? 100 : 300);
+                const y = 1100;
+                let pms_colors = fields[key_pms];
 
-            // Logo PMS colors
-            const x = view_num * 1000 + ((fields[key_view].length == 1) ? 100 : 300);
-            const y = 1100;
-            let pms_colors = fields[key_pms];
+                if ((typeof pms_colors !== 'undefined') & !blank) {
+                    for (let index = 0; index < pms_colors.length; index++) {
+                        // square
+                        techpack
+                            .fillColor(`#${pms_colors[index].split(",")[1]}`)
+                            .rect(x, y + 75 * index, 50, 50)
+                            .fill();
+                        // text
+                        let color_name = pms_colors[index].split(",")[0];
+                        color_name = (isNaN(parseInt(color_name[0]))) ? `${color_name} C` : `PMS ${color_name}`;
+                        techpack
+                            .font("./assets/fonts/Cantarell-Regular.ttf")
+                            .fontSize(30)
+                            .fillColor([0, 100, 0, 0])
+                            .text(`${color_name}`, x + 75, y + 25 + 75 * index, {
+                                baseline: "middle",
+                            });
+                    }
+                }
 
-            if (typeof pms_colors !== 'undefined' & !blank) {
-                for (let index = 0; index < pms_colors.length; index++) {
-                    // square
+                // Dimensioned logo
+                let filetype = files[key_logo_file]["filename"].split(".").pop();
+                let dim_width = 0;
+                if ((filetype=="svg") & !blank) {
+                    const logo = await loadImage(logo_path);
+                    const scale = Math.min(400 / logo.width, 300 / logo.height);
+                    dim_width = logo.width*scale;
+                    techpack.image(logo_path, x + 400, y, {
+                        valign: "bottom",
+                        fit: [400, 300]
+                    });
+                } else if (!blank) {
+                    dim_width = 400;
                     techpack
-                        .fillColor(`#${pms_colors[index].split(",")[1]}`)
-                        .rect(x, y + 75 * index, 50, 50)
-                        .fill();
-                    // text
-                    let color_name = pms_colors[index].split(",")[0];
-                    color_name = (isNaN(parseInt(color_name[0]))) ? `${color_name} C` : `PMS ${color_name}`;
+                    .font("./assets/fonts/Cantarell-Regular.ttf")
+                    .fontSize(30)
+                    .fillColor([0, 100, 0, 0])
+                    .text(`VECTOR FILE NEEDED`, x + 400, y + 200, {
+                        align: "center",
+                        width: 400
+                    })
+                }
+
+                // logo dimensions
+                if (!blank) {
+                    techpack
+                        .strokeColor([0, 100, 0, 0])
+                        .lineWidth(2)
+                        .moveTo(x + 400, y + 325)
+                        .lineTo(x + 400, y + 350)
+                        .lineTo(x + 400 + dim_width, y + 350)
+                        .lineTo(x + 400 + dim_width, y + 325)
+                        .stroke();
                     techpack
                         .font("./assets/fonts/Cantarell-Regular.ttf")
                         .fontSize(30)
                         .fillColor([0, 100, 0, 0])
-                        .text(`${color_name}`, x + 75, y + 25 + 75 * index, {
-                            baseline: "middle",
-                        });
+                        .text(`${fields[key_width]} in`, x + 400, y + 375, {
+                            align: "center",
+                            width: dim_width
+                        })
                 }
             }
-
-            // Dimensioned logo
-            let filetype = files[key_logo_file]["filename"].split(".").pop();
-            let dim_width = 0;
-            if (filetype=="svg" & !blank) {
-                const logo = await loadImage(logo_path);
-                const scale = Math.min(400 / logo.width, 300 / logo.height);
-                dim_width = logo.width*scale;
-                techpack.image(logo_path, x + 400, y, {
-                    valign: "bottom",
-                    fit: [400, 300]
-                });
-            } else if (!blank) {
-                dim_width = 400;
-                techpack
-                .font("./assets/fonts/Cantarell-Regular.ttf")
-                .fontSize(30)
-                .fillColor([0, 100, 0, 0])
-                .text(`VECTOR FILE NEEDED`, x + 400, y + 200, {
-                    align: "center",
-                    width: 400
-                })
-            }
-
-            // logo dimensions
-            if (!blank) {
-                techpack
-                    .strokeColor([0, 100, 0, 0])
-                    .lineWidth(2)
-                    .moveTo(x + 400, y + 325)
-                    .lineTo(x + 400, y + 350)
-                    .lineTo(x + 400 + dim_width, y + 350)
-                    .lineTo(x + 400 + dim_width, y + 325)
-                    .stroke();
-                techpack
-                    .font("./assets/fonts/Cantarell-Regular.ttf")
-                    .fontSize(30)
-                    .fillColor([0, 100, 0, 0])
-                    .text(`${fields[key_width]} in`, x + 400, y + 375, {
-                        align: "center",
-                        width: dim_width
-                    })
-                }
-
+            
             // increment view number
             view_num = view_num + 1;
         }
@@ -418,7 +420,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
 
     // place a logo on a render
     async function generateMockup(model, view, paths, logo_path, mockup_path, logo_buffer, width, shift, filename, sticker, blank, console) {
-
+        
         // add helmet render
         const helmet = await loadImage(paths.helmet);
         const canvas = createCanvas(helmet.width, helmet.height);
@@ -436,7 +438,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
                 ctx.drawImage(sticker, 0, 0);
                 break;
         }
-
+        
         let base_height;
         let center_offset;
         let scaler;
