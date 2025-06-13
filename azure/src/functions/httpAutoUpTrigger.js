@@ -269,11 +269,11 @@ async function techpackGenerator(fields, files, console, writeStream) {
                             .fill();
                         // text
                         let color_name = pms_colors[index].split(",")[0];
-                        color_name = (isNaN(parseInt(color_name[0]))) ? `${color_name} C` : `PMS ${color_name}`;
+                        color_name = (isNaN(parseInt(color_name[0]))) ? `${color_name} C` : `PMS ${color_name} C`;
                         techpack
                             .font("./assets/fonts/Industry-Book.otf")
                             .fontSize(30)
-                            .fillColor([244, 123, 32])
+                            .fillColor("#f47b20")
                             .text(`${color_name}`, x + 75, y + 25 + 75 * index, {
                                 baseline: "middle",
                             });
@@ -296,7 +296,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     techpack
                     .font("./assets/fonts/Industry-Book.otf")
                     .fontSize(30)
-                    .fillColor([244, 123, 32])
+                    .fillColor("#f47b20")
                     .text(`VECTOR FILE NEEDED`, x + 400, y + 200, {
                         align: "center",
                         width: 400
@@ -306,7 +306,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
                 // logo dimensions
                 if (!blank) {
                     techpack
-                        .strokeColor([244, 123, 32])
+                        .strokeColor("#f47b20")
                         .lineWidth(2)
                         .moveTo(x + 400, y + 325)
                         .lineTo(x + 400, y + 350)
@@ -316,7 +316,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     techpack
                         .font("./assets/fonts/Industry-Book.otf")
                         .fontSize(30)
-                        .fillColor([244, 123, 32])
+                        .fillColor("#f47b20")
                         .text(`${fields[key_width]} in`, x + 400, y + 375, {
                             align: "center",
                             width: dim_width
@@ -330,19 +330,19 @@ async function techpackGenerator(fields, files, console, writeStream) {
 
         // Divider line
         techpack
-            .lineWidth(2)
-            .strokeColor([244, 123, 32])
+            .lineWidth(3)
+            .strokeColor("#f47b20")
             .moveTo(100, 1050)
             .lineTo(page_width - 100, 1050)
             .stroke();
         techpack
             .font("./assets/fonts/Industry-Bold.otf")
             .fontSize(20)
-            .fillColor([244, 123, 32])
+            .fillColor("#f47b20")
             .text("FINAL ARTWORK AT 100% ACTUAL SIZE", 100, 1050);
 
         // Signature box
-        const signature_x = ((num_views == 1) ? 1000 : 1700);
+        const signature_x = ((num_views == 1) ? 1000 : 700 + 1000*(num_views-1));
         const signature_y = ((num_views == 1) ? 1350 : 128);
         techpack
             .strokeColor([0, 0, 0, 100])
@@ -377,16 +377,21 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     format: "mm/dd/yy",
                 })
         
-        // STYLE BOX AROUND STUDSON
+        // STYLE BOX
         techpack.moveTo(30, 55)
-                .lineTo(((num_views == 1) ? 1420 : 2420), 55)
-                .lineTo(((num_views == 1) ? 1570 : 2570), 205)
-                .lineTo(((num_views == 1) ? 1570 : 2570), 350)
+                .lineTo(1420 + 1000*(num_views-1), 55)
+                .lineTo(1570 + 1000*(num_views-1), 205)
+                .lineTo(1570 + 1000*(num_views-1), 350)
                 .lineTo(30, 350)
                 .lineTo(30, 55)
+                .lineTo(31, 55)
                 .moveTo(675, 55)
                 .lineTo(675, 350)
-                .strokeColor([244, 123, 32])
+                .moveTo(1570 + 1000*(num_views-1), 350)
+                .lineTo(1570 + 1000*(num_views-1), 1600)
+                .lineTo(30, 1600)
+                .lineTo(30, 350)
+                .strokeColor("#f47b20")
                 .lineWidth(5)
                 .stroke();
     }
