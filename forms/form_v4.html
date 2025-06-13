@@ -272,6 +272,12 @@
             const viewsSelect = document.getElementById(`views${mockupNumber}`);
             const selectedViews = Array.from(viewsSelect.selectedOptions).map(opt => opt.value);
 
+			let prevSelectedViews;
+			if (mockupNumber>1) {
+				const prevViewsSelect = document.getElementById(`views${mockupNumber-1}`);
+            	prevSelectedViews = Array.from(prevViewsSelect.selectedOptions).map(opt => opt.value);
+			}
+
             const container = document.getElementById(`logosContainer${mockupNumber}`);
             container.innerHTML = ""; // Clear existing fields
 
@@ -283,7 +289,7 @@
                     <label for="logoType${mockupNumber}_${view}">Logo Type:</label>
                     <select style="width: fit-content" name="logoType${mockupNumber}_${view}" onchange="updateLogoFields(this, ${mockupNumber}, '${view}')"}>
                         <option value="New Logo" selected>New Logo</option>
-                        <option value="Same Logo (as previous)" ${mockupNumber === 1 ? 'disabled' : ''}>Same Logo (as previous)</option>
+                        <option value="Same Logo (as previous)" ${(mockupNumber === 1) || (!prevSelectedViews.includes(view)) ? 'disabled' : ''}>Same Logo (as previous)</option>
                         <option value="American Flag">American Flag</option>
                         <option value="American Flag (transparent)">American Flag (transparent)</option>
                         <option value="American Flag (reverse)">American Flag (reverse)</option>
