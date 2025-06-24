@@ -153,7 +153,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
             .font("./assets/fonts/Industry-Book.otf")
             .fillColor("#282828")
             .fontSize(28)
-            .text("DATE:\nCUSTOMER:\nHELMET STYLE:\nCOLOR:\nCERTIFICATIONS:\nVERSION", 700, 75)
+            .text("DATE:\nCUSTOMER:\nHELMET STYLE:\nCOLOR:\nCERTIFICATIONS:\nVERSION:", 700, 75)
             .text(`${getDate()}\n${fields["companyName"]}\nSHK-1 ${fields[key_model]} ${fields[key_class]}\n${fields[key_color]}\nANSI Z89.1 - 2014 TYPE II\n${getVersion(fields["verTechpack"][0])}`, 975, 75);
 
         // Generate each view's mockup
