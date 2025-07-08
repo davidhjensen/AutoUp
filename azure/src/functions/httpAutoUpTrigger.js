@@ -365,6 +365,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
                 align: "center",
                 width: 480 - 355
             })
+        /*
         techpack.formText(`Approval Signature ${i}`, signature_x + 20, signature_y + 68, 345 - 20, 60, {
                     align: "center",
                     required: true,
@@ -376,7 +377,8 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     backgroundColor: "#FFFFFF",
                     format: "mm/dd/yy",
                 })
-        
+        */
+       
         // STYLE BOX
         techpack.moveTo(30, 55)
                 .lineTo(1420 + 1000*(num_views-1), 55)
