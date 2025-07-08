@@ -4,7 +4,3 @@ This app streamlines the workflow of sales reps for STUDSON by allowing proofs f
 The forms are found in `./forms/`.
 
 To debug the function, use Azure's extensions for VS Code to run `./azure/src/functions/httpAutoUpTrigger.js` locally. Then, update the form to post to the local address of the function.
-
-
-This project provides functionality to automatically generate product mockups for sales reps. This is done (for now) through a local HTML form that is parsed and used to generate a mockup using JavaScript.
-For now, run `test_form_read.js` by running `node test_form_read.js`. Then, fill out `form_v2.html` in `forms/`. The generated techpack is saved to `function/techpack.pdf`.
