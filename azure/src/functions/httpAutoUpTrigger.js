@@ -108,7 +108,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
     console.log("PDF file initialized");
 
     // enable form
-    techpack.initForm();
+    // techpack.initForm();
 
     // generate each page in the techpack
     for (let i = 0; i < parseInt(fields["numMockups"][0]); i++) {
@@ -378,7 +378,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     format: "mm/dd/yy",
                 })
         */
-       
+
         // STYLE BOX
         techpack.moveTo(30, 55)
                 .lineTo(1420 + 1000*(num_views-1), 55)
