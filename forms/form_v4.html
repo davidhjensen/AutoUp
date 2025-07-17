@@ -47,7 +47,10 @@
 		}
 		select {
 			cursor: pointer;
-			padding: 5px;
+			padding: 3px;
+			width: 158px;
+			font-family: "Industry"; /* Text input height reduced */
+			margin-bottom: 5px;
 		}
         .mockup-form {
 			margin: 20px 0;
@@ -106,7 +109,8 @@
 			font-size: 12px;
 			font-family: "Industry";
 		}
-		input, select { height: 25%;
+		input {
+			height: 25%;
 			width: 150px;
 			font-family: "Industry"; /* Text input height reduced */
 			margin-bottom: 5px;
@@ -172,7 +176,7 @@
       </g>
     </svg>
     <h1>CUSTOM LOGO TECHPACK GENERATOR</h1>
-    <form id="maindoc" action="https://techpackgenerator.azurewebsites.net/api/httpTriggerStreamResponse?" method="POST" enctype="multipart/form-data" target="_blank" onsubmit="return validateForm()">    
+    <form id="maindoc" action="https://prod-23.northcentralus.logic.azure.com:443/workflows/4443bd501564444a9bde782c39387bcd/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=mV0ldgqn3lmNLCTutjYCoHNpThCw9Z63IRh7-1AVK88" method="POST" enctype="multipart/form-data" target="_blank" onsubmit="return validateForm()">    
 
 		<label for="companyName">Company Name:</label>
         <input type="text" id="companyName" name="companyName" required><br>
@@ -182,6 +186,12 @@
 
         <label for="numMockups">Number of Mockups:</label>
         <input type="number" id="numMockups" name="numMockups" min="1" step="1" value="1" required><br>
+
+		<label for="sharepointUpload">Upload to SharePoint:</label>
+		<select id="sharepointUpload" name="sharepointUpload" required>
+                        <option value="Yes">Yes</option>
+                        <option value="No" selected="selected">No</option>
+        </select><br>
 
         <button type="button" id="generateForms">Generate Mockup Forms</button>
 
@@ -379,6 +389,8 @@
 
         const pmsColors = {
 		"White": "FFFFFF",
+		"4209": "38584B",
+		"7421": "651D32",
 		"2176": "A6B8C1",
 		"7480": "00BF6F",
 		"877": "8A8D8F",
