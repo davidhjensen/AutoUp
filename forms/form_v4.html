@@ -300,6 +300,12 @@
                     <div id="logoFields${mockupNumber}_${view}">
                         <label for="logo${mockupNumber}_${view}">Logo:</label>
                         <input style="width: fit-content" type="file" name="logo${mockupNumber}_${view}" accept=".svg,.png,.webp,.jpg" required><br>
+						
+						<label for="removeBackground${mockupNumber}_${view}">Remove white:</label>
+						<select style="width: fit-content" name="removeBackground${mockupNumber}_${view}">
+							<option value=0 selected>No</option>
+							<option value=1>Yes</option>
+						</select><br>
 
                         <label for="logoWidth${mockupNumber}_${view}">Width:</label>
                         <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}>
@@ -350,6 +356,12 @@
                     logoFields.innerHTML = `
                         <label for="logo${mockupNumber}_${view}">Logo:</label>
                         <input type="file" style="width: fit-content" name="logo${mockupNumber}_${view}" accept=".svg,.png,.jpg" required><br>
+
+						<label for="removeBackground${mockupNumber}_${view}">Remove white:</label>
+						<select style="width: fit-content" name="removeBackground${mockupNumber}_${view}">
+							<option value=0 selected>No</option>
+							<option value=1>Yes</option>
+						</select><br>
 
                         <label for="logoWidth${mockupNumber}_${view}">Width:</label>
                         <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}>

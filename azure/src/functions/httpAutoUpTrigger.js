@@ -169,6 +169,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
             const mockup_path = path.join(os.tmpdir(), `${view}_mockup_${i}.png`);
             const key_width = `logoWidth${i + 1}_${view}`;
             const key_shift = `logoShift${i + 1}_${view}`;
+            const key_remove_background = `removeBackground${i + 1}_${view}`;
             const key_pms = `pmsColor${i + 1}_${view}[]`;
             const key_shortcut = `logoType${i + 1}_${view}`;
 
@@ -185,6 +186,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     files[key_logo_file] = "NULL";
                     fields[key_width] = "NULL";
                     fields[key_shift] = "NULL";
+                    fields[key_remove_background] = '0';
                     fields[key_pms] = "NULL";
                     files[key_logo_file]["filename"] = "NULL";
                     break;
@@ -193,6 +195,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     files[key_logo_file] = files[`logo${i}_${view}`];
                     fields[key_width] = fields[`logoWidth${i}_${view}`];
                     fields[key_shift] = fields[`logoShift${i}_${view}`];
+                    fields[key_remove_background] = fields[`removeBackground${i}_${view}`];
                     fields[key_pms] = fields[`pmsColor${i}_${view}[]`]
                     break;
 
@@ -200,24 +203,28 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     files[key_logo_file] = {buffer: "./assets/logos/american_white.svg" }; // Store buffer and metadata
                     fields[key_pms] = ["187,A6192E", "5265,403A60", "WHITE,FFFFFF"];
                     files[key_logo_file]["filename"] = "svg";
+                    fields[key_remove_background] = '0';
                     break;
 
                 case "American Flag (transparent)":
                     files[key_logo_file] = {buffer: "./assets/logos/american.svg" }; // Store buffer and metadata
                     fields[key_pms] = ["187,A6192E", "5265,403A60"];
                     files[key_logo_file]["filename"] = "svg";
+                    fields[key_remove_background] = '0';
                     break;
 
                 case "American Flag (reverse)":
                     files[key_logo_file] = {buffer: "./assets/logos/american_white_reverse.svg" }; // Store buffer and metadata
                     fields[key_pms] = ["187,A6192E", "5265,403A60", "WHITE,FFFFFF"];
                     files[key_logo_file]["filename"] = "svg";
+                    fields[key_remove_background] = '0';
                     break;
 
                 case "American Flag (transparent) (reverse)":
                     files[key_logo_file] = {buffer: "./assets/logos/american_reverse.svg" }; // Store buffer and metadata
                     fields[key_pms] = ["187,A6192E", "5265,403A60"];
                     files[key_logo_file]["filename"] = "svg";
+                    fields[key_remove_background] = '0';
                     break;
 
                 default:
@@ -232,7 +239,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
                 techpack.end();
                 return 1;
             }
-            await generateMockup(fields[key_model], view, paths, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), files[key_logo_file]["filename"], sticker, blank, console);
+            await generateMockup(fields[key_model], view, paths, logo_path, mockup_path, files[key_logo_file].buffer, Number(fields[key_width]), Number(fields[key_shift]), Number(fields[key_remove_background]), files[key_logo_file]["filename"], sticker, blank, console);
 
             // place render
             const render_height = ((["Front", "Back"].includes(view)) ? 1200 : 1050);
@@ -439,7 +446,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
     }
 
     // place a logo on a render
-    async function generateMockup(model, view, paths, logo_path, mockup_path, logo_buffer, width, shift, filename, sticker, blank, console) {
+    async function generateMockup(model, view, paths, logo_path, mockup_path, logo_buffer, width, shift, remove_background, filename, sticker, blank, console) {
         
         // add helmet render
         const helmet = await loadImage(paths.helmet);
@@ -464,6 +471,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
         let scaler;
 
         let logo;
+        let filetype;
         let logoWidth;
         let logoHeight;
         let curveHeight;
@@ -491,7 +499,7 @@ async function techpackGenerator(fields, files, console, writeStream) {
                 }
                 scaler = 492; // pixels per inch
                 
-                let filetype = filename.split(".").pop();
+                filetype = filename.split(".").pop();
                 if (filetype=="svg") {
                     // Convert SVG to PNG
                     await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
@@ -501,10 +509,21 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     logo = await loadImage(logo_path);
                 } else {
                     // resize PNG
-                    await sharp(logo_buffer)
-                        .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
-                        .png() // Convert to PNG format
-                        .toFile(logo_path); // Save to specified file path
+                    sharp_image = sharp(logo_buffer);
+                    if (remove_background === 1) {
+                        await sharp_image
+                            .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" })
+                            .png()
+                            .unflatten()
+                            .toFile(logo_path); // Save to specified file path
+                    } else {
+                        await sharp_image
+                            .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" })
+                            .png()
+                            .toFile(logo_path); // Save to specified file path
+                    }
+
+                    // Load into canvas
                     logo = await loadImage(logo_path);
                 }
 
@@ -537,12 +556,34 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     scaler = 285; // pixels per inch
                 }
 
-                // Convert SVG to PNG
-                await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
-                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
-                    .png() // Convert to PNG format
-                    .toFile(logo_path); // Save to specified file path
-                logo = await loadImage(logo_path);
+                filetype = filename.split(".").pop();
+                if (filetype=="svg") {
+                    // Convert SVG to PNG
+                    await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
+                        .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
+                        .png() // Convert to PNG format
+                        .toFile(logo_path); // Save to specified file path
+                    logo = await loadImage(logo_path);
+                } else {
+                    // resize PNG
+                    sharp_image = sharp(logo_buffer);
+                    if (remove_background === 1) {
+                        await sharp_image
+                            .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" })
+                            .png()
+                            .unflatten()
+                            .toFile(logo_path); // Save to specified file path
+                    } else {
+                        await sharp_image
+                            .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" })
+                            .png()
+                            .toFile(logo_path); // Save to specified file path
+                    }
+
+                    // Load into canvas
+                    logo = await loadImage(logo_path);
+                }
+
 
                 // Simulate curved warping and vertical compression
                 logoWidth = logo.width;
@@ -574,12 +615,34 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     scaler = 285; // pixels per inch
                 }
 
-                // Convert SVG to PNG
-                await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
-                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
-                    .png() // Convert to PNG format
-                    .toFile(logo_path); // Save to specified file path
-                logo = await loadImage(logo_path);
+                filetype = filename.split(".").pop();
+                if (filetype=="svg") {
+                    // Convert SVG to PNG
+                    await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
+                        .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
+                        .png() // Convert to PNG format
+                        .toFile(logo_path); // Save to specified file path
+                    logo = await loadImage(logo_path);
+                } else {
+                    // resize PNG
+                    sharp_image = sharp(logo_buffer);
+                    if (remove_background === 1) {
+                        await sharp_image
+                            .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" })
+                            .png()
+                            .unflatten()
+                            .toFile(logo_path); // Save to specified file path
+                    } else {
+                        await sharp_image
+                            .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" })
+                            .png()
+                            .toFile(logo_path); // Save to specified file path
+                    }
+
+                    // Load into canvas
+                    logo = await loadImage(logo_path);
+                }
+
 
                 // Simulate curved warping and vertical compression
                 logoWidth = logo.width;
@@ -610,12 +673,34 @@ async function techpackGenerator(fields, files, console, writeStream) {
                     center_x = 3890;
                     scaler = 560; // pixels per inch
                 }
-                // Convert SVG to PNG
-                await sharp(logo_buffer)
-                    .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
-                    .png() // Convert to PNG format
-                    .toFile(logo_path); // Save to specified file path
-                logo = await loadImage(logo_path);
+
+                filetype = filename.split(".").pop();
+                if (filetype=="svg") {
+                    // Convert SVG to PNG
+                    await sharp((typeof logo_buffer == "string") ? logo_buffer : Buffer.from(logo_buffer))
+                        .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" }) // fit WIDTH only to provided width (5x limit on height)
+                        .png() // Convert to PNG format
+                        .toFile(logo_path); // Save to specified file path
+                    logo = await loadImage(logo_path);
+                } else {
+                    // resize PNG
+                    sharp_image = sharp(logo_buffer);
+                    if (remove_background === 1) {
+                        await sharp_image
+                            .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" })
+                            .png()
+                            .unflatten()
+                            .toFile(logo_path); // Save to specified file path
+                    } else {
+                        await sharp_image
+                            .resize(Math.round(width * scaler), Math.round(5 * width * scaler), { fit: "inside" })
+                            .png()
+                            .toFile(logo_path); // Save to specified file path
+                    }
+
+                    // Load into canvas
+                    logo = await loadImage(logo_path);
+                }
 
                 // Simulate curved warping
                 logoWidth = logo.width;
