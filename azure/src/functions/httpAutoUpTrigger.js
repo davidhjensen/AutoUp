@@ -41,7 +41,8 @@ app.http('httpTriggerStreamResponse', {
             status: 200,
             headers: {
                 'Content-Type': 'application/pdf',
-                'Content-Disposition': `attachment; filename="${parsed.fields["companyName"][0].toLowerCase().split(" ").join("_")}_techpack_v${parsed.fields["verTechpack"][0]}.pdf"`
+                'Content-Disposition': `attachment; filename="${parsed.fields["companyName"][0].toLowerCase().split(" ").join("_")}_techpack_v${parsed.fields["verTechpack"][0]}.pdf"`,
+                'Company-Name': (parsed.fields["sharepointUpload"][0]=="Yes" ? `${parsed.fields["companyName"][0]}` : "")
             },
             body: fileStream
         };
