@@ -47,7 +47,10 @@
 		}
 		select {
 			cursor: pointer;
-			padding: 5px;
+			padding: 3px;
+			width: 158px;
+			font-family: "Industry"; /* Text input height reduced */
+			margin-bottom: 5px;
 		}
         .mockup-form {
 			margin: 20px 0;
@@ -106,7 +109,8 @@
 			font-size: 12px;
 			font-family: "Industry";
 		}
-		input, select { height: 25%;
+		input {
+			height: 25%;
 			width: 150px;
 			font-family: "Industry"; /* Text input height reduced */
 			margin-bottom: 5px;
@@ -172,7 +176,7 @@
       </g>
     </svg>
     <h1>CUSTOM LOGO TECHPACK GENERATOR</h1>
-    <form id="maindoc" action="https://techpackgenerator.azurewebsites.net/api/httpTriggerStreamResponse?" method="POST" enctype="multipart/form-data" target="_blank" onsubmit="return validateForm()">    
+    <form id="maindoc" action="https://prod-23.northcentralus.logic.azure.com:443/workflows/4443bd501564444a9bde782c39387bcd/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=mV0ldgqn3lmNLCTutjYCoHNpThCw9Z63IRh7-1AVK88" method="POST" enctype="multipart/form-data" target="_blank" onsubmit="return validateForm()">    
 
 		<label for="companyName">Company Name:</label>
         <input type="text" id="companyName" name="companyName" required><br>
@@ -182,6 +186,12 @@
 
         <label for="numMockups">Number of Mockups:</label>
         <input type="number" id="numMockups" name="numMockups" min="1" step="1" value="1" required><br>
+
+		<label for="sharepointUpload">Upload to SharePoint:</label>
+		<select id="sharepointUpload" name="sharepointUpload" required>
+                        <option value="Yes" selected="selected">Yes</option>
+                        <option value="No">No</option>
+        </select><br>
 
         <button type="button" id="generateForms">Generate Mockup Forms</button>
 
@@ -247,7 +257,7 @@
                         <option value="FishelYellow_123">FishelYellow_123</option> 
                     </select><br>
 
-					          <label for="helmetSticker${i}">Stickers:</label>
+					<label for="helmetSticker${i}">Stickers:</label>
                     <select id="helmetSticker${i}" name="helmetSticker${i}" required>
                         <option value="None" selected="selected">None</option>
                         <option value="Grey">Grey</option>
@@ -271,6 +281,8 @@
         function generateLogoAndPmsFields(mockupNumber) {
             const viewsSelect = document.getElementById(`views${mockupNumber}`);
             const selectedViews = Array.from(viewsSelect.selectedOptions).map(opt => opt.value);
+			const stickerSelect = document.getElementById(`helmetSticker${mockupNumber}`);
+            const selectedSticker = Array.from(stickerSelect.selectedOptions).map(opt => opt.value);
 
 			let prevSelectedViews;
 			if (mockupNumber>1) {
@@ -287,7 +299,7 @@
                 section.innerHTML = `
                     <legend><b>${view} View</b></legend>
                     <label for="logoType${mockupNumber}_${view}">Logo Type:</label>
-                    <select style="width: fit-content" name="logoType${mockupNumber}_${view}" onchange="updateLogoFields(this, ${mockupNumber}, '${view}')"}>
+                    <select style="width: fit-content" name="logoType${mockupNumber}_${view}" onchange="updateLogoFields(this, ${mockupNumber}, '${view}', '${selectedSticker}')"}>
                         <option value="New Logo" selected>New Logo</option>
                         <option value="Same Logo (as previous)" ${(mockupNumber === 1) || (!prevSelectedViews.includes(view)) ? 'disabled' : ''}>Same Logo (as previous)</option>
                         <option value="American Flag">American Flag</option>
@@ -300,6 +312,12 @@
                     <div id="logoFields${mockupNumber}_${view}">
                         <label for="logo${mockupNumber}_${view}">Logo:</label>
                         <input style="width: fit-content" type="file" name="logo${mockupNumber}_${view}" accept=".svg,.png,.webp,.jpg" required><br>
+						
+						<label for="removeBackground${mockupNumber}_${view}">Remove white:</label>
+						<select style="width: fit-content" name="removeBackground${mockupNumber}_${view}">
+							<option value=0 selected>No</option>
+							<option value=1>Yes</option>
+						</select><br>
 
                         <label for="logoWidth${mockupNumber}_${view}">Width:</label>
                         <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}>
@@ -312,14 +330,15 @@
                     
                     <button style="margin-left: 50px" type="button" id="addPmsColor(${mockupNumber}, '${view}')" onclick="addPmsColor(${mockupNumber}, '${view}')">Add Another PMS Color</button>   
                     <div id="pmsColorsContainer${mockupNumber}_${view}" class="pms-container"></div>
-					<small style="font-family: Industry; margin: 50px"><i>*Select </i>REMOVE<i> to remove the PMS color</i></small>
+					<small style="font-family: Industry; margin: 50px"><i>*Select </i>REMOVE<i> to remove the PMS color.</i></small><br>
+					<small style="font-family: Industry; margin: 50px">&ensp;<i><a href="https://www.coderstool.com/hex-pantone" target="_blank">Click here to convert HEX to PMS</a></i></small>
                 `;
                 container.appendChild(section);
 				        addPmsColor(`${mockupNumber}`, `${view}`);
             });
         }
 
-        function updateLogoFields(select, mockupNumber, view) {
+        function updateLogoFields(select, mockupNumber, view, stickers) {
             const logoFields = document.getElementById(`logoFields${mockupNumber}_${view}`);
             const pmsColorsContainer = document.getElementById(`pmsColorsContainer${mockupNumber}_${view}`);
             const pmsButton = document.getElementById(`addPmsColor(${mockupNumber}, '${view}')`);
@@ -327,7 +346,7 @@
 
             switch (select.value) {
                 case "Same Logo (as previous)":
-				        case "Blank":
+				case "Blank":
                     logoFields.innerHTML = ""; // Clear fields for "Same Logo (as previous)"
                     pmsButton.disabled = true;
                     break;
@@ -337,11 +356,11 @@
                 case "American Flag (transparent) (reverse)":
 					logoFields.innerHTML = `
 						<label for="logoWidth${mockupNumber}_${view}">Width:</label>
-						<input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}>
+						<input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="2.5" max="3.25"' : ''} ${view==="Left" ? 'value="2.5" max="3.5"' : ''} ${view==="Right" ? 'value="2.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}>
 						<span>in.</span><br>
 
 						<label for="logoShift${mockupNumber}_${view}">Vertical Shift:</label>
-						<input type="number" name="logoShift${mockupNumber}_${view}" step="0.05" value="0"  required min="-2" max="2">
+						<input type="number" name="logoShift${mockupNumber}_${view}" step="0.05" ${stickers !== "None" && view !== "Back" ? 'value="-0.25"' : 'value="0"'}  required min="-2" max="2">
 						<span>in.</span>
 						`;
 					pmsButton.disabled = true;
@@ -350,6 +369,12 @@
                     logoFields.innerHTML = `
                         <label for="logo${mockupNumber}_${view}">Logo:</label>
                         <input type="file" style="width: fit-content" name="logo${mockupNumber}_${view}" accept=".svg,.png,.jpg" required><br>
+
+						<label for="removeBackground${mockupNumber}_${view}">Remove white:</label>
+						<select style="width: fit-content" name="removeBackground${mockupNumber}_${view}">
+							<option value=0 selected>No</option>
+							<option value=1>Yes</option>
+						</select><br>
 
                         <label for="logoWidth${mockupNumber}_${view}">Width:</label>
                         <input type="number" name="logoWidth${mockupNumber}_${view}" step="0.05"  min="0" required ${view==="Front" ? 'value="3.25" max="3.25"' : ''} ${view==="Left" ? 'value="3.5" max="3.5"' : ''} ${view==="Right" ? 'value="3.5" max="3.5"' : ''} ${view==="Back" ? 'value="1.75" max="1.75"' : ''}>
@@ -367,6 +392,17 @@
 
         const pmsColors = {
 		"White": "FFFFFF",
+		"7541": "D9E1E2",
+		"7730": "4B9560",
+		"7744": "BABC16",
+		"7693": "004976",
+		"4209": "38584B",
+		"7421": "651D32",
+		"2176": "A6B8C1",
+		"7480": "00BF6F",
+		"877": "8A8D8F",
+		"7721": "651D32",
+		"7736": "395542",
 		"7428": "6A2C3E",
 		"7734": "286140",
 		"7725": "008755",
@@ -754,6 +790,7 @@
 		"278": "99badd",
 		"279": "418FDE",
 		"Reflex Blue": "0c1c8c",
+		"Reflex Blue 25%": "bfc4e1",
 		"280": "002b7f",
 		"281": "002868",
 		"282": "002654",
