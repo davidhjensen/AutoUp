@@ -4,3 +4,14 @@ This app streamlines the workflow of sales reps for STUDSON by allowing proofs f
 The forms are found in `./forms/`.
 
 To debug the function, use Azure's extensions for VS Code to run `./azure/src/functions/httpAutoUpTrigger.js` locally. Then, update the form to post to the local address of the function.
+
+<table>
+  <tr>
+    <td style="vertical-align: top;">
+      <img src="https://github.com/user-attachments/assets/3a4361a4-e040-47ea-9a64-0ef903485a9e" width="100%">
+    </td>
+    <td style="vertical-align: top;">
+      <img src="https://github.com/user-attachments/assets/4b4c0296-4fa3-4c7e-8943-83d7fb056e12" width="100%">
+    </td>
+  </tr>
+</table>
